@@ -46,3 +46,4 @@ contract/src/*.d.ts.map
 api/src/**/*.js
 api/src/**/*.d.ts
 api/src/**/*.js.map
+public/
