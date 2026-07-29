@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../../../",
+  "sources": ["src/whistleblower.compact", "compiler/standard-library.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAAA;;;;;;;;;;MAUA,AAAA,YAGC;;;;;cAH2B,iBAAsB;;;;;;;;;;;;;;;;;;yCAAtB,iBAAsB;;;;;;;;;8CAAtB,iBAAsB;;;OAGjD;MAED,AAAA,iBAEC;;OAAA;MAED,AAAA,cAMC;;;;;cAN6B,iBAAsB;cAAE,UAA0B;;;;;;;;;;;;;;;;;;yCAAlD,iBAAsB,+BAAE,UAA0B;;;;;;;;;gDAAlD,iBAAsB;gDAAE,UAA0B;;;OAM/E;;;;;;;;;;GAAC;EAzBF;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAIA;;;;;;;;;yEAAsC;IACtC;;;;;;;;;yEAAuC;IACvC;;;;;;;;;yEAA+B;IAC/B;;;;;;;;;yEAAgC;IAChC;;;;;;;;;yEAAyC;;;;;;;GAiBvC;ECzBF,AAAA,kBAAA;oEAAA;;;EDUA,AAAA,eAGC,4BAH2B,iBAAsB;4BACvC,iBAAe;;oDAAI;;;;;;;;;;;yHAAmB;;;GAEhD;EAED,AAAA,oBAEC,CAFgC,iBAAsB,EAAE,KAAU;mCACb,iBAAe,EAAE,KAAG;GACzE;EAED,AAAA,iBAMC,4BAN6B,iBAAsB,EAAE,UAA0B;oDAC/D,iBAAe;UACtB,WAAiE,6BAAnC,iBAAe;0EAAE;;;;;;;;;;;+IAAQ;UAC7D,KAAa;;;;;6CAAG;;;;;;;;;;;kHAAa;;;IAA7B;;;;;;;2HAAA,KAAa;;yEAAA;UACb,KAAc;;;;;6CAAG;;;;;;;;;;;kHAAc;;;IAA/B;;;;;;;2HAAA,KAAc;;yEAAA;UACd,KAAQ;IAAR;;;;;;;;;;6FAAA,KAAQ;;;;wEAAA;;GACX;;;;;;;;;;;;;;;;IArBD;qCAAA;;;;;;;;;;;0GAAsC;KAAA;IACtC;qCAAA;;;;;;;;;;;0GAAuC;KAAA;IACvC;qCAAA;;;;;;;;;;;0GAA+B;KAAA;IAC/B;qCAAA;;;;;;;;;;;0GAAgC;KAAA;IAChC;qCAAA;;;;;;;;;;;0GAAyC;KAAA;;;;;;;;EAOzC,AAAA,iBAEC;;;;UAFgC,iBAAsB;UAAE,KAAU;;;;;;;;;;;;;;;+CAAlC,iBAAsB,EAAE,KAAU;GAElE;;;;"
+}
