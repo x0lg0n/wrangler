@@ -1,0 +1,26 @@
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger feedbackCount: Uint<16>;
+export ledger nullifierCount: Uint<16>;
+export ledger owner: Bytes<32>;
+export ledger sequence: Counter;
+export ledger authorizationSecret: Field;
+
+export circuit isAuthorized(inputCredential: Field): Boolean {
+    assert(inputCredential == authorizationSecret, "Unauthorized: invalid credential");
+    return true;
+}
+
+export circuit generateNullifier(inputCredential: Field, seq: Field): Bytes<32> {
+    return disclose(persistentHash<Vector<2, Field>>([inputCredential, seq]));
+}
+
+export circuit submitFeedback(inputCredential: Field, feedback: Opaque<"string">): [] {
+    isAuthorized(inputCredential);
+    const nullifier = generateNullifier(inputCredential, sequence as Field);
+    feedbackCount = feedbackCount + 1 as Uint<16>;
+    nullifierCount = nullifierCount + 1 as Uint<16>;
+    sequence.increment(1);
+}
