@@ -28,10 +28,10 @@ pnpm run cli         # interactive CLI (credential: 0)
 
 ## 📸 Screenshots
 
-| Compile Output | Contract Deployment |
+| Compile Output | Contract Deployment (Preview) |
 |:---:|:---:|
 | ![compile](./screenshots/compile-output.png) | ![deploy](./screenshots/contract-deploy.png) |
-| `pnpm run compact` — 2 circuits compiled | `pnpm run deploy` — contract address |
+| `pnpm run compact` — 2 circuits compiled | `pnpm run deploy --network preview` — deployed to Preview testnet |
 
 ## 🧠 Overview
 
@@ -70,39 +70,55 @@ The `isAuthorized` circuit proves `inputCredential == authorizationSecret` on-ch
 ## 📁 Project Structure
 
 ```
-wrangler/
-├── contract/               # Compact smart contract
-│   ├── src/
-│   │   ├── whistleblower.compact  # Contract source (3 circuits)
-│   │   ├── index.ts               # TypeScript contract entry
-│   │   ├── witnesses.ts           # Private state helpers
-│   │   └── managed/               # Compiled ZK circuits + proving keys
-│   └── dist/                      # TypeScript build output
-├── api/                    # Contract deployment & interaction API
+wrangler/                          # Root: deployment scripts & orchestrator
+│
+├── src/                           # Production deployment scripts
+│   ├── deploy.ts                  #   Contract deployer (local, preview, preprod)
+│   ├── setup.ts                   #   Docker → compile → deploy (all-in-one)
+│   ├── cli.ts                     #   Runtime CLI with full wallet (credential: 0)
+│   ├── network.ts                 #   Multi-network config manager (local/preview/preprod)
+│   ├── wallet.ts                  #   Wallet creation, key derivation, lifecycle
+│   ├── wallet-state.ts            #   Persistent wallet state (LevelDB serialization)
+│   └── check-balance.ts           #   Wallet balance checker
+│
+├── contract/                      # Compact smart contract (workspace)
 │   └── src/
-│       ├── index.ts              # API implementation
-│       ├── common-types.ts       # Provider & state types
-│       └── utils/                # Hex encoding, random bytes
-├── cli/                    # Interactive CLI
-│   ├── src/index.ts
-│   ├── config.ts
+│       ├── whistleblower.compact  #   Contract source — 3 ZK circuits
+│       ├── index.ts               #   TypeScript contract entry (CompiledContract + witnesses)
+│       ├── witnesses.ts           #   Private state factory (createWhistleblowerPrivateState)
+│       └── managed/               #   Compiled ZK circuits, proving + verifying keys
+│
+├── api/                           # Contract interaction API (workspace)
+│   └── src/
+│       ├── index.ts               #   WhistleblowerAPI: deploy, join, submitFeedback, getFeedbacks
+│       ├── common-types.ts        #   Provider & derived state types
+│       └── utils/                 #   toHex, randomBytes helpers
+│
+├── cli/                           # Interactive CLI (workspace)
+│   ├── src/index.ts               #   Terminal UI for feedback submission
+│   ├── config.ts                  #   CLI configuration
 │   └── midnight-wallet-provider.ts
-├── ui/                     # React + Vite web interface (WIP)
+│
+├── ui/                            # React + Vite web interface (workspace, WIP)
 │   └── src/App.tsx
-├── src/                    # Production deployment scripts
-│   ├── deploy.ts           # Contract deployer
-│   ├── setup.ts            # Docker + compile + deploy orchestrator
-│   ├── cli.ts              # Runtime CLI with full wallet
-│   ├── network.ts          # Multi-network config manager
-│   ├── wallet.ts           # Wallet creation & lifecycle
-│   └── wallet-state.ts     # Persistent wallet state
-├── tests/                  # Vitest test suite
-│   └── contract.test.ts    # 10 tests
-├── screenshots/            # Submission screenshots
-├── docker-compose.yml      # Devnet services
-└── docs/                   # Documentation
-    ├── ARCHITECTURE.md
-    └── DEVELOPMENT.md
+│
+├── tests/                         # Vitest test suite
+│   └── contract.test.ts           #   10 tests: artifacts, circuits, API exports
+│
+├── scripts/                       # Build helper scripts
+│   └── copy-managed.mjs           #   Copies compiled circuits into dist/
+│
+├── screenshots/                   # Challenge submission screenshots
+│   ├── compile-output.png         #   pnpm run compact — 2 circuits compiled
+│   └── contract-deploy.png        #   pnpm run deploy — contract address on Preview
+│
+├── docs/
+│   ├── ARCHITECTURE.md            # System design & data flow
+│   └── DEVELOPMENT.md             # Dev workflow guide
+│
+├── docker-compose.yml             # Devnet services (node, indexer, proof-server)
+├── package.json                   # Workspace root config
+└── pnpm-lock.yaml                 # Dependency lock
 ```
 
 ## ⚙️ Smart Contract
@@ -157,24 +173,39 @@ pnpm run setup
 pnpm run cli
 ```
 
-### Preprod Network
+### Preview Network
 
 ```bash
 # Switch network
-pnpm run network preprod
+pnpm run network preview
 
 # Start only the proof server (devnet not needed)
 docker compose up -d proof-server
 
-# Deploy (auto-waits for faucet funding)
+# Fund wallet at the faucet, then deploy
+# Visit https://faucet.preview.midnight.network with the wallet address shown below
+pnpm run deploy --network preview
+```
+
+Currently deployed on Preview:
+```
+Contract Address: 744e890d6e3cc06ec0ab578211ef4812a7a6f154dd8ee8551186fa95226be5ef
+Wallet Address:   mn_addr_preview13pavsacgjvzpj8p6kwdn9lj6h8jymm9gtfs3ch5any5j06ry4qts9l8fdm
+```
+
+### Preprod Network
+
+```bash
+pnpm run network preprod
+docker compose up -d proof-server
 pnpm run deploy --network preprod
 ```
 
 ### Troubleshooting
 
 **Deploy stuck on "Waiting for faucet..."**
-→ Manually request tNIGHT at the [Preprod Faucet](https://midnight-tmnight-preprod.nethermind.dev/)
-→ Set shorter timeout: `MIDNIGHT_FAUCET_TIMEOUT_MS=300000 pnpm run deploy --network preprod`
+→ Manually request tNIGHT at [Preview Faucet](https://faucet.preview.midnight.network) or [Preprod Faucet](https://faucet.preprod.midnight.network)
+→ Set shorter timeout: `MIDNIGHT_FAUCET_TIMEOUT_MS=300000 pnpm run deploy --network preview`
 
 **Port conflicts**
 → `docker compose down` then retry
@@ -196,8 +227,8 @@ pnpm run test
 | Network | Indexer | Faucet | Proof Server |
 |---------|---------|--------|-------------|
 | Local | `http://127.0.0.1:8088` | N/A | Local Docker |
-| Preview | `https://indexer.preview.midnight.network` | [Faucet](https://midnight-tmnight-preview.nethermind.dev/) | Local Docker |
-| Preprod | `https://indexer.preprod.midnight.network` | [Faucet](https://midnight-tmnight-preprod.nethermind.dev/) | Local Docker |
+| Preview | `https://indexer.preview.midnight.network` | [Faucet](https://faucet.preview.midnight.network) | Local Docker |
+| Preprod | `https://indexer.preprod.midnight.network` | [Faucet](https://faucet.preprod.midnight.network) | Local Docker |
 
 Switch: `pnpm run network <name>`
 
