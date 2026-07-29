@@ -38,3 +38,11 @@ contract/pnpm-lock.yaml
 api/pnpm-lock.yaml
 api/package-lock.json
 contract/src/managed/compiler/
+contract/package-lock.json
+contract/src/*.js
+contract/src/*.d.ts
+contract/src/*.js.map
+contract/src/*.d.ts.map
+api/src/**/*.js
+api/src/**/*.d.ts
+api/src/**/*.js.map
