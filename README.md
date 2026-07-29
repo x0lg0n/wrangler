@@ -1,212 +1,228 @@
 # ZK-Verified Whistleblower & Feedback Protocol
 
-A decentralized application (dApp) on the [Midnight Network](https://midnight.network/) that enables anonymous, mathematically verifiable feedback submission using Zero-Knowledge Proofs (ZKPs).
-
 [![Compact Compiler](https://img.shields.io/badge/Compact-0.31.0-1abc9c.svg)](https://midnight.network/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0-green.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D24.11.1-339933.svg)](https://nodejs.org/)
+[![Tests](https://img.shields.io/badge/tests-10/10-passing-brightgreen)](https://github.com/x0lg0n/wrangler/actions)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
-> **Midnight Challenge Submission — Level 1: New Moon**
+> **Midnight Challenge — Level 1: New Moon** · Anonymous, ZK-verified feedback on the Midnight Network
 
 ---
 
-## Product Idea
+## 📋 Product Idea
 
 An anonymous, ZK-verifiable feedback platform for DAOs, enterprises, and journalism. Organizations publish on-chain credential roots, and verified stakeholders submit feedback without revealing their identity — not even their wallet address. The system guarantees every piece of feedback came from a legitimate stakeholder (via ZK proof), prevents double submissions (via cryptographic nullifiers), and publishes everything on the Midnight ledger for transparent, tamper-proof records. Unlike centralized alternatives (Blind, AllVoices), this protocol requires zero trust in a third party — mathematical proofs replace promises.
 
----
+## 🚀 Quick Start
 
-## Overview
-
-Organizations struggle to gather honest, critical feedback due to fear of retaliation. This protocol provides a **trustless solution** using ZKPs to mathematically prove that a user holds valid authorization credentials — without revealing those credentials or the user's wallet address to the network.
-
-### How It Works
-
-```
-User Action     →  Local Proof Generation     →  On-chain Verification
-     │                       │                        │
-     ▼                       ▼                        ▼
- Enter feedback     Proof Server generates      Midnight Node
- + credential       ZK proof of authorization   verifies proof
-                    + nullifier                  → ledger updated
+```bash
+git clone https://github.com/x0lg0n/wrangler.git
+cd wrangler
+pnpm install
+pnpm run build
+pnpm run setup       # local devnet
+pnpm run cli         # interactive CLI (credential: 0)
 ```
 
-## Privacy Model: Public State vs Private Witness
+## 📸 Screenshots
 
-The protocol splits data into three tiers:
+| Compile Output | Contract Deployment |
+|:---:|:---:|
+| ![compile](./screenshots/compile-output.png) | ![deploy](./screenshots/contract-deploy.png) |
+| `pnpm run compact` — 2 circuits compiled | `pnpm run deploy` — contract address |
 
-| Tier | What | Visibility | Example |
-|------|------|------------|---------|
-| **Public Ledger** | `feedbackCount`, `nullifierCount`, `sequence`, `owner` | Everyone | Total submissions, unique submitters |
-| **Public Input** | `inputCredential` (to circuit) | The circuit's public input | A hashed field element |
-| **Private Witness** | The raw credential value | User's machine only | The actual authorization secret |
+## 🧠 Overview
 
-The `isAuthorized` circuit proves `inputCredential == authorizationSecret` on-chain without ever revealing the credential itself. The `generateNullifier` circuit creates a public hash (`Bytes<32>`) from the private credential — this hash is stored on-chain to prevent double-submission, but cannot be reversed to identify the submitter.
+Organizations struggle to gather honest, critical feedback due to fear of retaliation. This protocol provides a **trustless solution** using Zero-Knowledge Proofs to mathematically prove that a user holds valid authorization credentials — without revealing those credentials or the user's wallet address to the network.
 
-## Project Structure
+### Architecture
 
 ```
-whistleblower-protocol/
-├── contract/               # Smart contract (Compact language)
+┌──────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   User CLI   │────▶│  Proof Server    │────▶│  Midnight Node  │
+│  (credential │     │  (Docker)        │     │  (ledger)       │
+│   + feedback)│     │  ZK proof gen    │     │  proof verify   │
+└──────────────┘     └──────────────────┘     └─────────────────┘
+                            │                        │
+                            ▼                        ▼
+                     ┌──────────────────┐     ┌─────────────────┐
+                     │  Private State   │     │  Public Ledger  │
+                     │  (credential)    │     │  feedbackCount  │
+                     │  never exposed   │     │  nullifierCount │
+                     └──────────────────┘     │  sequence       │
+                                              └─────────────────┘
+```
+
+## 🔐 Privacy Model: Public State vs Private Witness
+
+The protocol operates across three tiers of data visibility:
+
+| Tier | Data | Visibility | Cryptographic Guarantee |
+|------|------|------------|------------------------|
+| **Public Ledger** | `feedbackCount`, `nullifierCount`, `sequence`, `owner` | Everyone (on-chain) | Integrity via chain consensus |
+| **Public Input** | `inputCredential` (field element) | Circuit input | ZK proof binds input to witness |
+| **Private Witness** | Raw credential value | User's machine only | Never transmitted or stored on-chain |
+
+The `isAuthorized` circuit proves `inputCredential == authorizationSecret` on-chain without ever revealing the credential. The `generateNullifier` circuit creates a deterministic public hash from the private credential — this hash prevents double-submission but cannot be reversed to identify the submitter.
+
+## 📁 Project Structure
+
+```
+wrangler/
+├── contract/               # Compact smart contract
 │   ├── src/
-│   │   ├── whistleblower.compact  # Contract source
-│   │   ├── index.ts               # Contract entry
-│   │   └── witnesses.ts           # Private state helpers
-│   ├── src/managed/               # Compiled ZK circuits + keys
+│   │   ├── whistleblower.compact  # Contract source (3 circuits)
+│   │   ├── index.ts               # TypeScript contract entry
+│   │   ├── witnesses.ts           # Private state helpers
+│   │   └── managed/               # Compiled ZK circuits + proving keys
 │   └── dist/                      # TypeScript build output
-├── api/                    # Contract API (deploy/join/interact)
+├── api/                    # Contract deployment & interaction API
 │   └── src/
 │       ├── index.ts              # API implementation
-│       ├── common-types.ts       # Type definitions
-│       └── utils/                # Utilities
+│       ├── common-types.ts       # Provider & state types
+│       └── utils/                # Hex encoding, random bytes
 ├── cli/                    # Interactive CLI
-│   └── src/index.ts
-├── ui/                     # React web interface (WIP)
-├── src/                    # Deployment infrastructure
-│   ├── deploy.ts           # Contract deployment
-│   ├── setup.ts            # Docker + compile + deploy
-│   ├── cli.ts              # Interactive CLI (tsx)
-│   ├── network.ts          # Network config
-│   ├── wallet.ts           # Wallet management
-│   └── wallet-state.ts     # State persistence
-├── tests/                  # Test suite
-│   └── contract.test.ts
-└── docker-compose.yml      # Local devnet services
+│   ├── src/index.ts
+│   ├── config.ts
+│   └── midnight-wallet-provider.ts
+├── ui/                     # React + Vite web interface (WIP)
+│   └── src/App.tsx
+├── src/                    # Production deployment scripts
+│   ├── deploy.ts           # Contract deployer
+│   ├── setup.ts            # Docker + compile + deploy orchestrator
+│   ├── cli.ts              # Runtime CLI with full wallet
+│   ├── network.ts          # Multi-network config manager
+│   ├── wallet.ts           # Wallet creation & lifecycle
+│   └── wallet-state.ts     # Persistent wallet state
+├── tests/                  # Vitest test suite
+│   └── contract.test.ts    # 10 tests
+├── screenshots/            # Submission screenshots
+├── docker-compose.yml      # Devnet services
+└── docs/                   # Documentation
+    ├── ARCHITECTURE.md
+    └── DEVELOPMENT.md
 ```
 
-## Smart Contract
+## ⚙️ Smart Contract
 
-The Compact contract (`contract/src/whistleblower.compact`) implements three circuits:
+The contract is written in [Compact](https://midnight.network/developers) — Midnight's ZK-smart contract language.
 
-| Circuit | Type | Purpose |
-|---------|------|---------|
-| `isAuthorized` | Proof | Verifies the submitter holds a valid credential |
-| `generateNullifier` | Pure | Creates a unique hash to prevent double-submission |
-| `submitFeedback` | Composite | Authorizes, nullifies, and records feedback on-chain |
+### Circuits
 
-**Ledger state:**
-- `feedbackCount` — total submissions
-- `nullifierCount` — unique submitters
-- `owner` — contract deployer identity
-- `authorizationSecret` — the authorized credential hash
-- `sequence` — monotonic counter for nullifier derivation
+| Circuit | Type | Rows | Purpose |
+|---------|------|------|---------|
+| `isAuthorized` | Proof | 51 | Verifies `inputCredential == authorizationSecret` |
+| `generateNullifier` | Pure | — | Deterministic hash: `persistentHash([credential, seq])` |
+| `submitFeedback` | Composite | 4632 | Authorizes → nullifies → increments counters |
 
-## Prerequisites
+### Ledger State
 
-| Tool | Version | Purpose |
+```
+feedbackCount:    Uint<16>        — total submissions
+nullifierCount:   Uint<16>        — unique submitters
+owner:            Bytes<32>       — deployer identity
+authorizationSecret: Field        — authorized credential
+sequence:         Counter         — monotonic nullifier seed
+```
+
+## 📋 Prerequisites
+
+| Tool | Version | Install |
 |------|---------|---------|
-| Node.js | >= 24.11.1 | Runtime |
-| pnpm | >= 9 | Package manager |
-| Docker | Latest | Local devnet + proof server |
-| compactc | 0.31.0 | Compact compiler |
+| Node.js | >= 24.11.1 | [nodejs.org](https://nodejs.org/) |
+| pnpm | >= 9 | `npm install -g pnpm` |
+| Docker | Latest | [docker.com](https://docker.com/) |
+| compactc | 0.31.0 | [Midnight SDK](https://midnight.network/developers) |
 
-## Setup Instructions
+## 🔧 Setup
 
-### 1. Clone & Install
+### Local Devnet
 
 ```bash
-git clone <your-repo-url>
-cd whistleblower-protocol
+# Install dependencies
 pnpm install
-```
 
-### 2. Compile the Contract
-
-```bash
+# Compile Compact contract
 pnpm run compact
-```
 
-Expected output:
-```
-Compiling 2 circuits:
-  circuit "isAuthorized" (k=6, rows=51)
-  circuit "submitFeedback" (k=13, rows=4632)
-```
-
-### 3. Build TypeScript Packages
-
-```bash
+# Build TypeScript packages
 pnpm run build
-```
 
-### 4a. Local Devnet (Quick Start)
-
-```bash
+# Start Docker services + deploy
 pnpm run setup
+
+# Run interactive CLI (credential: 0)
 pnpm run cli
 ```
 
-For local devnet, credential is `0`.
-
-### 4b. Deploy to Preprod
+### Preprod Network
 
 ```bash
+# Switch network
 pnpm run network preprod
+
+# Start only the proof server (devnet not needed)
 docker compose up -d proof-server
+
+# Deploy (auto-waits for faucet funding)
 pnpm run deploy --network preprod
 ```
 
-The deploy script will generate a wallet, wait for faucet funds, and deploy the contract.
+### Troubleshooting
 
-## Tests
+**Deploy stuck on "Waiting for faucet..."**
+→ Manually request tNIGHT at the [Preprod Faucet](https://midnight-tmnight-preprod.nethermind.dev/)
+→ Set shorter timeout: `MIDNIGHT_FAUCET_TIMEOUT_MS=300000 pnpm run deploy --network preprod`
+
+**Port conflicts**
+→ `docker compose down` then retry
+→ Check: `ss -tlnp | grep -E '6300|8088|9944'`
+
+## 🧪 Tests
 
 ```bash
 pnpm run test
 ```
 
-## Screenshots
+10 tests covering:
+- Contract compilation artifacts (managed directory, circuit keys, source integrity)
+- Private state creation and credential isolation
+- API type exports and module resolution
 
-### Compile Output
+## 🌐 Networks
 
-> [Insert screenshot of `pnpm run compact` showing both circuits compiled]
+| Network | Indexer | Faucet | Proof Server |
+|---------|---------|--------|-------------|
+| Local | `http://127.0.0.1:8088` | N/A | Local Docker |
+| Preview | `https://indexer.preview.midnight.network` | [Faucet](https://midnight-tmnight-preview.nethermind.dev/) | Local Docker |
+| Preprod | `https://indexer.preprod.midnight.network` | [Faucet](https://midnight-tmnight-preprod.nethermind.dev/) | Local Docker |
 
-### Contract Deployed
+Switch: `pnpm run network <name>`
 
-> [Insert screenshot of `pnpm run deploy` showing contract address]
+## 📦 Commands
 
-## CLI Usage
+| Command | Description |
+|---------|-------------|
+| `pnpm run compact` | Compile Compact → managed circuits + keys |
+| `pnpm run build` | Build all TypeScript packages |
+| `pnpm run test` | Run Vitest test suite |
+| `pnpm run setup` | Docker + compact + build + deploy (all-in-one) |
+| `pnpm run deploy` | Deploy contract to active network |
+| `pnpm run cli` | Interactive CLI |
+| `pnpm run check-balance` | Wallet balance |
+| `pnpm run network` | Show/switch active network |
+| `pnpm run clean` | Reset local state |
 
-```
-1. Submit feedback     — Enter credential + feedback text
-2. View ledger state   — Read chain state (counts)
-3. Exit               — Quit CLI
-```
+## 🤝 Contributing
 
-## Networks
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-| Network | Indexer | Faucet |
-|---------|---------|--------|
-| Local devnet | http://127.0.0.1:8088 | N/A |
-| Preview | https://indexer.preview.midnight.network | [Faucet](https://midnight-tmnight-preview.nethermind.dev/) |
-| Preprod | https://indexer.preprod.midnight.network | [Faucet](https://midnight-tmnight-preprod.nethermind.dev/) |
-
-Switch networks:
-```bash
-pnpm run network preprod   # Switch to preprod
-pnpm run network           # Show current network
-```
-
-## Commands
-
-```bash
-pnpm run compact              # Compile Compact contract
-pnpm run build                # Build all packages
-pnpm run setup                # Docker + compile + deploy
-pnpm run deploy               # Deploy to current network
-pnpm run cli                  # Interactive CLI
-pnpm run check-balance        # Wallet balance
-pnpm run network              # Show/set network
-pnpm run test                 # Run tests
-pnpm run proof-server:start   # Start proof server
-pnpm run proof-server:stop    # Stop all services
-pnpm run clean                # Reset local state
-```
-
-## Security
+## 🛡️ Security
 
 See [SECURITY.md](SECURITY.md) for vulnerability disclosure.
 
-## License
+## 📄 License
 
 Apache 2.0 — see [LICENSE](LICENSE).
