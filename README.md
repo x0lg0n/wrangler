@@ -69,10 +69,12 @@ The `isAuthorized` circuit proves `inputCredential == authorizationSecret` on-ch
 
 ## 📁 Project Structure
 
+The root `src/` holds deployment & orchestration scripts (not part of any workspace package — they import from `contract/`, `api/`, and `cli/`). Each workspace (`contract/`, `api/`, `cli/`) has its own `src/` for its specific code. The `scripts/` folder has a build helper used during compilation.
+
 ```
 wrangler/                          # Root: deployment scripts & orchestrator
 │
-├── src/                           # Production deployment scripts
+├── src/                           # Deployment & orchestration scripts (root-level)
 │   ├── deploy.ts                  #   Contract deployer (local, preview, preprod)
 │   ├── setup.ts                   #   Docker → compile → deploy (all-in-one)
 │   ├── cli.ts                     #   Runtime CLI with full wallet (credential: 0)
