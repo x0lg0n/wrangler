@@ -1,0 +1,17 @@
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger feedbackCount: Uint<16>;
+export ledger authorizationSecret: Bytes<32>;
+
+export circuit initialize(secret: Bytes<32>): [] {
+    assert(feedbackCount == 0, 'already initialized');
+    authorizationSecret = disclose(secret);
+}
+
+export circuit submitFeedback(feedback: Opaque<"string">, credential: Bytes<32>): [] {
+    assert(credential == authorizationSecret, 'unauthorized');
+    disclose(feedback);
+    feedbackCount = feedbackCount + 1 as Uint<16>;
+}

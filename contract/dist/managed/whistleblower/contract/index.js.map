@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../../../",
+  "sources": ["src/whistleblower.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAAA;;;;;;;;;;MAOA,AAAA,UAGC;;;;;cAHyB,QAAiB;;;;;;;;;;;;;;;;;;yCAAjB,QAAiB;;;;;;;uEAAjB,QAAiB;;;OAG1C;MAED,AAAA,cAIC;;;;;cAJ6B,UAA0B;cAAE,YAAqB;;;;;;;;;;;;;;;;;;yCAAjD,UAA0B,+BAAE,YAAqB;;;;;;;;;gDAAjD,UAA0B;gDAAE,YAAqB;;;OAI9E;;;;;;;;;;GACA;EAjBD;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAIA;;;;;;;;;yEAAsC;IACtC;;;;;;;;;yEAA6C;;;;;;;GAY5C;EAVD,AAAA,aAGC,4BAHyB,QAAiB;kEAChC;;;;;;;;;;;uIAAa;;;IACpB;;;;;;;2HAA+B,QAAM;;yEAAlB;;GACtB;EAED,AAAA,iBAIC,4BAJ6B,UAA0B,EAAE,YAAqB;0CACpE,YAAU;kEAAI;;;;;;;;;;;uIAAmB;;IAC/B,UAAQ;UACjB,KAAa;;;;;6CAAG;;;;;;;;;;;kHAAa;;;IAA7B;;;;;;;2HAAA,KAAa;;yEAAA;;GAChB;;;;;;;;;;;;;;;;;;;;;;;;IAZD;qCAAA;;;;;;;;;;;0GAAsC;KAAA;IACtC;qCAAA;;;;;;;;;;;0GAA6C;KAAA;;;;;;;;;;"
+}
