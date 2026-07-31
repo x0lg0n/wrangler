@@ -1,5 +1,6 @@
 # ZK-Verified Whistleblower & Feedback Protocol
 
+[![CI](https://github.com/x0lg0n/wrangler/actions/workflows/ci.yml/badge.svg)](https://github.com/x0lg0n/wrangler/actions)
 [![Compact Compiler](https://img.shields.io/badge/Compact-0.31.0-1abc9c.svg)](https://midnight.network/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-green.svg)](LICENSE)
@@ -7,7 +8,7 @@
 [![Tests](https://img.shields.io/badge/tests-10/10-passing-brightgreen)](https://github.com/x0lg0n/wrangler/actions)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
-> **Midnight Challenge — Level 1: New Moon** · Anonymous, ZK-verified feedback on the Midnight Network
+> **Midnight Challenge — Level 3: Half Moon** · Anonymous, ZK-verified feedback on the Midnight Network
 
 ---
 
@@ -101,8 +102,19 @@ wrangler/                          # Root: deployment scripts & orchestrator
 │   ├── config.ts                  #   CLI configuration
 │   └── midnight-wallet-provider.ts
 │
-├── ui/                            # React + Vite web interface (workspace, WIP)
-│   └── src/App.tsx
+├── ui/                            # Next.js web interface (workspace)
+│   ├── app/
+│   │   ├── layout.tsx             #   Root layout with dark theme
+│   │   ├── page.tsx               #   Home page (contract status + feedback UI)
+│   │   ├── globals.css            #   CSS variables, dark theme, primitives
+│   │   └── api/
+│   │       ├── contract/route.ts  #   GET — reads .midnight-state.json
+│   │       └── feedback/route.ts  #   GET/POST — list/submit feedbacks
+│   └── components/
+│       ├── header.tsx             #   App header with network badge
+│       ├── contract-status.tsx    #   Live contract deployment info
+│       ├── feedback-form.tsx      #   Credential + message form
+│       └── feedback-list.tsx      #   Feedback cards display
 │
 ├── tests/                         # Vitest test suite
 │   └── contract.test.ts           #   10 tests: artifacts, circuits, API exports
@@ -247,6 +259,8 @@ Switch: `pnpm run network <name>`
 | `pnpm run check-balance` | Wallet balance |
 | `pnpm run network` | Show/switch active network |
 | `pnpm run clean` | Reset local state |
+| `npm run ui:dev` | Start Next.js dev server (port 3000) |
+| `npm run ui:build` | Build Next.js for production |
 
 ## 🤝 Contributing
 
@@ -259,3 +273,23 @@ See [SECURITY.md](SECURITY.md) for vulnerability disclosure.
 ## 📄 License
 
 Apache 2.0 — see [LICENSE](LICENSE).
+
+## 🧪 Tests & CI
+
+The contract, its compiled artifacts, and the API layer are covered by a Vitest suite
+(`tests/contract.test.ts`):
+
+```bash
+pnpm test
+```
+
+- Contract compilation: compiled `managed/` circuits, generated contract API, proving keys
+- Contract source: the `initialize` / `submitFeedback` circuits and the authorize-then-disclose
+  pattern in `whistleblower.compact`
+- Witnesses: the private state is empty by design — no identity or credential lives in witness
+  state; the credential is the off-chain `authorizationSecret`
+- TypeScript API: exported types and the `WhistleblowerAPI` class
+
+Every push to `main` (and every pull request) runs compile, lint, typecheck, tests, and the
+UI production build via GitHub Actions — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+Current status: [![CI](https://github.com/x0lg0n/wrangler/actions/workflows/ci.yml/badge.svg)](https://github.com/x0lg0n/wrangler/actions)
