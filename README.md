@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-green.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D24.11.1-339933.svg)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/tests-10/10-passing-brightgreen)](https://github.com/x0lg0n/wrangler/actions)
+[![Tests](https://img.shields.io/badge/tests-10%2F10-passing-brightgreen)](https://github.com/x0lg0n/wrangler/actions)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
 > **Midnight Challenge — Level 3: Half Moon** · Anonymous, ZK-verified feedback on the Midnight Network
@@ -292,4 +292,3 @@ pnpm test
 
 Every push to `main` (and every pull request) runs compile, lint, typecheck, tests, and the
 UI production build via GitHub Actions — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
-Current status: [![CI](https://github.com/x0lg0n/wrangler/actions/workflows/ci.yml/badge.svg)](https://github.com/x0lg0n/wrangler/actions)
