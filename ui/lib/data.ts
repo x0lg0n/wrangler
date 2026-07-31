@@ -2,6 +2,8 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadFeedbacksFromStore, appendFeedback } from '@/lib/feedback-store';
 
+export { getStoreDiagnostics } from '@/lib/feedback-store';
+
 const rootDir = resolve(process.cwd(), '..');
 const statePath = resolve(rootDir, '.midnight-state.json');
 const feedbacksPath = resolve(rootDir, '.feedbacks.json');

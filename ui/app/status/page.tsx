@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   Layers,
 } from 'lucide-react';
-import { readState, loadFeedbacks } from '@/lib/data';
+import { readState, loadFeedbacks, getStoreDiagnostics } from '@/lib/data';
 import CopyButton from '@/components/copy-button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,10 +65,12 @@ function StatCard({
   );
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function StatusPage() {
   const { deployment, error } = readState();
   const feedbacks = await loadFeedbacks();
-  const kvConfigured = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+  const diag = getStoreDiagnostics();
 
   const healthItems = [
     { label: 'Contract', value: deployment ? 'Deployed' : 'Not Deployed', ok: !!deployment, icon: <ShieldCheck className="size-4" /> },
@@ -224,8 +226,11 @@ export default async function StatusPage() {
                 { label: 'Server Actions', value: 'Enabled', ok: true },
                 {
                   label: 'Data Source',
-                  value: kvConfigured ? 'Vercel KV (Redis)' : 'Local JSON fallback — KV not configured',
-                  ok: kvConfigured,
+                  value:
+                    diag.source === 'redis'
+                      ? 'Vercel KV (Redis)'
+                      : 'Local JSON fallback — KV not configured',
+                  ok: diag.source === 'redis',
                 },
                 { label: 'On-chain Integration', value: 'Via Midnight SDK (browser wallet)', ok: true },
                 { label: 'Node.js', value: process.version, ok: true },
@@ -236,12 +241,20 @@ export default async function StatusPage() {
                     <Database className="size-4" />
                   </span>
                   <span className="w-[110px] shrink-0 text-[13px] font-medium">{item.label}</span>
-                  <span className="min-w-0 flex-1 truncate text-right text-[13px]" style={{ color: 'var(--green)' }}>
+                  <span
+                    className="min-w-0 flex-1 truncate text-right text-[13px]"
+                    style={{ color: item.ok ? 'var(--green)' : undefined }}
+                  >
                     {item.value}
                   </span>
-                  {DOT(true, 'green')}
+                  {DOT(item.ok, item.ok ? 'green' : 'red')}
                 </div>
               ))}
+              {diag.error && (
+                <div className="mt-2 rounded-lg border border-red/30 bg-red-bg px-3.5 py-2.5 text-xs text-red">
+                  Redis error: {diag.error}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
