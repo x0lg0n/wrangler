@@ -18,8 +18,8 @@ describe("Contract compilation", () => {
     expect(fs.existsSync(contractFile)).toBe(true);
     const contents = fs.readFileSync(contractFile, "utf-8");
     expect(contents).toContain("submitFeedback");
-    expect(contents).toContain("isAuthorized");
-    expect(contents).toContain("generateNullifier");
+    expect(contents).toContain("initialize");
+    expect(contents).toContain("authorizationSecret");
   });
 
   it("circuit proving keys exist", () => {
@@ -36,37 +36,33 @@ describe("Contract source", () => {
     const compactFile = path.join(projectRoot, "contract", "src", "whistleblower.compact");
     expect(fs.existsSync(compactFile)).toBe(true);
     const contents = fs.readFileSync(compactFile, "utf-8");
-    expect(contents).toContain("circuit isAuthorized");
+    expect(contents).toContain("circuit initialize");
     expect(contents).toContain("circuit submitFeedback");
-    expect(contents).toContain("circuit generateNullifier");
   });
 
-  it("contract uses authorize-nullify-submit pattern", () => {
+  it("contract uses authorize-then-disclose pattern", () => {
     const compactFile = path.join(projectRoot, "contract", "src", "whistleblower.compact");
     const contents = fs.readFileSync(compactFile, "utf-8");
-    expect(contents).toContain("isAuthorized(inputCredential)");
-    expect(contents).toContain("nullifier");
-    expect(contents).toContain("inputCredential == authorizationSecret");
+    expect(contents).toContain("credential == authorizationSecret");
+    expect(contents).toContain("disclose(feedback)");
+    expect(contents).toContain("feedbackCount + 1");
   });
 });
 
 describe("Witnesses (private state)", () => {
-  it("createWhistleblowerPrivateState stores credential correctly", async () => {
+  it("private state is empty (no identity or credential in witness state)", async () => {
     const { createWhistleblowerPrivateState } = await import(
       path.join(projectRoot, "contract", "src", "witnesses.ts")
     );
-    const credential = 42n;
-    const state = createWhistleblowerPrivateState(credential);
-    expect(state.credential).toBe(42n);
+    const state = createWhistleblowerPrivateState();
+    expect(state).toEqual({});
   });
 
-  it("multiple private states produce different nullifier seeds", async () => {
+  it("private state is identical across users (credential lives off-chain)", async () => {
     const { createWhistleblowerPrivateState } = await import(
       path.join(projectRoot, "contract", "src", "witnesses.ts")
     );
-    const state1 = createWhistleblowerPrivateState(12345n);
-    const state2 = createWhistleblowerPrivateState(67890n);
-    expect(state1.credential).not.toBe(state2.credential);
+    expect(createWhistleblowerPrivateState()).toEqual(createWhistleblowerPrivateState());
   });
 });
 
