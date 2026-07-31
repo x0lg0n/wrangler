@@ -5,7 +5,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-green.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D24.11.1-339933.svg)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/tests-10%2F10-passing-brightgreen)](https://github.com/x0lg0n/wrangler/actions)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
 > **Midnight Challenge — Level 3: Half Moon** · Anonymous, ZK-verified feedback on the Midnight Network
@@ -149,7 +148,7 @@ The contract is written in [Compact](https://midnight.network/developers) — Mi
 
 ### Ledger State
 
-```
+```bash
 feedbackCount:    Uint<16>        — total submissions
 nullifierCount:   Uint<16>        — unique submitters
 owner:            Bytes<32>       — deployer identity
@@ -202,7 +201,8 @@ pnpm run deploy --network preview
 ```
 
 Currently deployed on Preview:
-```
+
+```bash
 Contract Address: 744e890d6e3cc06ec0ab578211ef4812a7a6f154dd8ee8551186fa95226be5ef
 Wallet Address:   mn_addr_preview13pavsacgjvzpj8p6kwdn9lj6h8jymm9gtfs3ch5any5j06ry4qts9l8fdm
 ```
@@ -232,9 +232,29 @@ pnpm run test
 ```
 
 10 tests covering:
-- Contract compilation artifacts (managed directory, circuit keys, source integrity)
+
+- Contract compilation artifacts (managed directory,circuit keys, source integrity)
 - Private state creation and credential isolation
 - API type exports and module resolution
+
+## 🧪 Tests & CI
+
+The contract, its compiled artifacts, and the API layer are covered by a Vitest suite
+(`tests/contract.test.ts`):
+
+```bash
+pnpm test
+```
+
+- Contract compilation: compiled `managed/` circuits, generated contract API, proving keys
+- Contract source: the `initialize` / `submitFeedback` circuits and the authorize-then-disclose
+  pattern in `whistleblower.compact`
+- Witnesses: the private state is empty by design — no identity or credential lives in witness
+  state; the credential is the off-chain `authorizationSecret`
+- TypeScript API: exported types and the `WhistleblowerAPI` class
+
+Every push to `main` (and every pull request) runs compile, lint, typecheck, tests, and the
+UI production build via GitHub Actions — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 ## 🌐 Networks
 
@@ -273,22 +293,3 @@ See [SECURITY.md](SECURITY.md) for vulnerability disclosure.
 ## 📄 License
 
 Apache 2.0 — see [LICENSE](LICENSE).
-
-## 🧪 Tests & CI
-
-The contract, its compiled artifacts, and the API layer are covered by a Vitest suite
-(`tests/contract.test.ts`):
-
-```bash
-pnpm test
-```
-
-- Contract compilation: compiled `managed/` circuits, generated contract API, proving keys
-- Contract source: the `initialize` / `submitFeedback` circuits and the authorize-then-disclose
-  pattern in `whistleblower.compact`
-- Witnesses: the private state is empty by design — no identity or credential lives in witness
-  state; the credential is the off-chain `authorizationSecret`
-- TypeScript API: exported types and the `WhistleblowerAPI` class
-
-Every push to `main` (and every pull request) runs compile, lint, typecheck, tests, and the
-UI production build via GitHub Actions — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
