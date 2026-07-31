@@ -1,3 +1,4 @@
+import * as crypto from "node:crypto";
 import * as Whistleblower from "../../contract/src/managed/whistleblower/contract/index.js";
 
 import { type ContractAddress } from "@midnight-ntwrk/midnight-js-protocol/compact-runtime";
@@ -10,25 +11,25 @@ import {
   whistleblowerPrivateStateKey,
 } from "./common-types.js";
 import { CompiledWhistleblowerContractContract } from "../../contract/src/index";
-import * as utils from "./utils/index.js";
-import { deployContract, findDeployedContract } from "@midnight-ntwrk/midnight-js-contracts";
+import {
+  deployContract,
+  findDeployedContract,
+} from "@midnight-ntwrk/midnight-js-contracts";
 import { map, tap, type Observable } from "rxjs";
-import { WhistleblowerPrivateState, createWhistleblowerPrivateState } from "../../contract/src/witnesses.js";
+import {
+  createWhistleblowerPrivateState,
+  type WhistleblowerPrivateState,
+} from "../../contract/src/witnesses.js";
 
 export interface DeployedWhistleblowerAPI {
   readonly deployedContractAddress: ContractAddress;
   readonly state$: Observable<WhistleblowerDerivedState>;
 
-  submitFeedback: (credential: bigint, feedback: string) => Promise<void>;
-  getFeedbacks: () => Promise<{ feedbackCount: bigint; nullifierCount: bigint; sequence: bigint }>;
-}
-
-function bytesToBigint(bytes: Uint8Array): bigint {
-  let result = 0n;
-  for (const b of bytes) {
-    result = (result << 8n) + BigInt(b);
-  }
-  return result;
+  submitFeedback: (
+    feedback: string,
+    credential: string,
+  ) => Promise<{ txHash: string; blockHeight: bigint }>;
+  getFeedbackCount: () => Promise<bigint>;
 }
 
 export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
@@ -37,38 +38,47 @@ export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
     private readonly providers: WhistleblowerProviders,
     private readonly logger?: Logger,
   ) {
-    this.deployedContractAddress = deployedContract.deployTxData.public.contractAddress;
-    providers.privateStateProvider.setContractAddress(this.deployedContractAddress);
-    this.state$ = providers.publicDataProvider.contractStateObservable(this.deployedContractAddress, { type: "latest" }).pipe(
-      map((contractState) => {
-        const ledgerState = Whistleblower.ledger(contractState.data);
-        return {
-          feedbackCount: ledgerState.feedbackCount,
-          nullifierCount: ledgerState.nullifierCount,
-          sequence: ledgerState.sequence,
-          owner: ledgerState.owner,
-        };
-      }),
-      tap((state) =>
-        logger?.trace({
-          ledgerStateChanged: {
-            feedbackCount: state.feedbackCount,
-            nullifierCount: state.nullifierCount,
-            sequence: state.sequence,
-          },
-        }),
-      ),
+    this.deployedContractAddress =
+      deployedContract.deployTxData.public.contractAddress;
+    providers.privateStateProvider.setContractAddress(
+      this.deployedContractAddress,
     );
+    this.state$ = providers.publicDataProvider
+      .contractStateObservable(this.deployedContractAddress, { type: "latest" })
+      .pipe(
+        map((contractState) => {
+          const ledgerState = Whistleblower.ledger(contractState.data);
+          return {
+            feedbackCount: ledgerState.feedbackCount,
+            authorizationSecret: ledgerState.authorizationSecret,
+          };
+        }),
+        tap((state) =>
+          logger?.trace({
+            ledgerStateChanged: { feedbackCount: state.feedbackCount },
+          }),
+        ),
+      );
   }
 
   readonly deployedContractAddress: ContractAddress;
 
   readonly state$: Observable<WhistleblowerDerivedState>;
 
-  async submitFeedback(credential: bigint, feedback: string): Promise<void> {
-    this.logger?.info({ submittingFeedback: feedback.length }, "submittingFeedback");
+  async submitFeedback(
+    feedback: string,
+    credential: string,
+  ): Promise<{ txHash: string; blockHeight: bigint }> {
+    this.logger?.info(
+      { submittingFeedback: feedback.length },
+      "submittingFeedback",
+    );
 
-    const txData = await this.deployedContract.callTx.submitFeedback(credential, feedback);
+    const credHash = crypto.createHash("sha256").update(credential).digest();
+    const txData = await this.deployedContract.callTx.submitFeedback(
+      feedback,
+      credHash,
+    );
 
     this.logger?.trace({
       transactionAdded: {
@@ -77,28 +87,33 @@ export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
         blockHeight: txData.public.blockHeight,
       },
     });
-  }
 
-  async getFeedbacks(): Promise<{ feedbackCount: bigint; nullifierCount: bigint; sequence: bigint }> {
-    const contractState = await this.providers.publicDataProvider.queryContractState(
-      this.deployedContractAddress,
-    );
-    if (contractState === null) return { feedbackCount: 0n, nullifierCount: 0n, sequence: 0n };
-    const ledgerState = Whistleblower.ledger(contractState.data);
     return {
-      feedbackCount: ledgerState.feedbackCount,
-      nullifierCount: ledgerState.nullifierCount,
-      sequence: ledgerState.sequence,
+      txHash: txData.public.txHash,
+      blockHeight: BigInt(txData.public.blockHeight),
     };
   }
 
-  static async deploy(providers: WhistleblowerProviders, logger?: Logger): Promise<WhistleblowerAPI> {
+  async getFeedbackCount(): Promise<bigint> {
+    const contractState =
+      await this.providers.publicDataProvider.queryContractState(
+        this.deployedContractAddress,
+      );
+    if (contractState === null) return 0n;
+    const ledgerState = Whistleblower.ledger(contractState.data);
+    return ledgerState.feedbackCount;
+  }
+
+  static async deploy(
+    providers: WhistleblowerProviders,
+    logger?: Logger,
+  ): Promise<WhistleblowerAPI> {
     logger?.info("deployContract");
 
     const deployedContract = await deployContract(providers, {
       compiledContract: CompiledWhistleblowerContractContract,
       privateStateId: whistleblowerPrivateStateKey,
-      initialPrivateState: createWhistleblowerPrivateState(bytesToBigint(utils.randomBytes(32))),
+      initialPrivateState: createWhistleblowerPrivateState(),
     });
 
     logger?.trace({
@@ -117,16 +132,23 @@ export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
   ): Promise<WhistleblowerAPI> {
     logger?.info({ joinContract: { contractAddress } });
 
-    const deployedContract = await findDeployedContract<WhistleblowerContract>(providers, {
-      contractAddress,
-      compiledContract: CompiledWhistleblowerContractContract,
-      privateStateId: whistleblowerPrivateStateKey,
-      initialPrivateState: await WhistleblowerAPI.getPrivateState(providers, contractAddress),
-    });
+    const deployedContract = await findDeployedContract<WhistleblowerContract>(
+      providers,
+      {
+        contractAddress,
+        compiledContract: CompiledWhistleblowerContractContract,
+        privateStateId: whistleblowerPrivateStateKey,
+        initialPrivateState: await WhistleblowerAPI.getPrivateState(
+          providers,
+          contractAddress,
+        ),
+      },
+    );
 
     logger?.trace({
       contractJoined: {
-        finalizedDeployTxData: deployedContract.deployTxData.public,
+        finalizedDeployTxData:
+          deployedContract.deployTxData.public.contractAddress,
       },
     });
 
@@ -138,11 +160,11 @@ export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
     contractAddress: ContractAddress,
   ): Promise<WhistleblowerPrivateState> {
     providers.privateStateProvider.setContractAddress(contractAddress);
-    const existingPrivateState = await providers.privateStateProvider.get(whistleblowerPrivateStateKey);
-    return existingPrivateState ?? createWhistleblowerPrivateState(bytesToBigint(utils.randomBytes(32)));
+    const existingPrivateState = await providers.privateStateProvider.get(
+      whistleblowerPrivateStateKey,
+    );
+    return existingPrivateState ?? createWhistleblowerPrivateState();
   }
 }
-
-export * as utils from "./utils/index.js";
 
 export * from "./common-types.js";
