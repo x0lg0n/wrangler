@@ -57,3 +57,13 @@ out/
 .ui-reviews/
 UI-REVIEW.md
 _test-ui.sh
+
+# contract build output is committed: the ui imports the compiled
+# contract package at runtime (webpack) and Vercel has no compactc
+!contract/dist/
+!contract/dist/**
+
+# zk artifacts are committed: the browser wallet flow fetches them
+# from the deployed origin (FetchZkConfigProvider)
+!ui/public/
+!ui/public/**
