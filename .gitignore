@@ -67,3 +67,5 @@ _test-ui.sh
 # from the deployed origin (FetchZkConfigProvider)
 !ui/public/
 !ui/public/**
+.env.local
+.env.*.local
