@@ -10,7 +10,6 @@
   },
   "workspaces": {
     "packages": [
-      "cli",
       "ui",
       "api",
       "contract"
@@ -18,7 +17,7 @@
   },
   "scripts": {
     "compact": "npm run --workspace=contract compact",
-    "build": "npm run --workspace=contract build && npm run --workspace=api build && npm run --workspace=cli build",
+    "build": "npm run --workspace=contract build && npm run --workspace=api build",
     "setup": "tsx src/setup.ts",
     "deploy": "tsx src/deploy.ts",
     "cli": "tsx src/cli.ts",
@@ -26,6 +25,8 @@
     "network": "tsx src/network.ts",
     "proof-server:start": "docker compose up -d",
     "proof-server:stop": "docker compose down",
+    "ui:dev": "npm run --workspace=ui dev",
+    "ui:build": "npm run --workspace=ui build",
     "clean": "rm -rf .midnight-state.json .midnight-wallet-state",
     "test": "vitest run",
     "lint": "cd contract && npm run lint && cd ../api && npm run lint",
@@ -80,5 +81,10 @@
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.6.0",
     "vitest": "^4.1.10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
   }
 }

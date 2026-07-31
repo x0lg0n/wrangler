@@ -47,3 +47,13 @@ api/src/**/*.js
 api/src/**/*.d.ts
 api/src/**/*.js.map
 public/
+.feedbacks.json
+
+# Next.js
+.next/
+out/
+
+# UI review artifacts
+.ui-reviews/
+UI-REVIEW.md
+_test-ui.sh

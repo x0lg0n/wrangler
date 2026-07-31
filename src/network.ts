@@ -23,6 +23,7 @@ export interface DeploymentRecord {
   address: string;
   deployedAt: string;
   deployer: string;
+  authSecret?: string;
 }
 
 export interface NetworkState {

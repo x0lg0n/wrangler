@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { resolveNetwork, getOrCreateSeed, recordDeployment, type NetworkConfig } from './network';
+import * as crypto from 'node:crypto';
+import { resolveNetwork, getOrCreateSeed, recordDeployment, loadState, STATE_FILE_NAME, type NetworkConfig } from './network';
 import { createWallet, persistWalletState, unshieldedToken } from './wallet';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { WebSocket } from 'ws';
@@ -228,7 +229,7 @@ async function main() {
       deployed = await deployContract(providers, {
         compiledContract: CompiledWhistleblowerContractContract as any,
         privateStateId: PRIVATE_STATE_ID,
-        initialPrivateState: createWhistleblowerPrivateState(BigInt(0)),
+        initialPrivateState: createWhistleblowerPrivateState(),
       });
       break;
     } catch (err: any) {
@@ -283,8 +284,30 @@ async function main() {
   console.log('  ✅ Contract deployed successfully!\n');
   console.log(`  Contract Address: ${contractAddress}\n`);
 
+  console.log('─── Initialize Contract ─────────────────────────────────────────\n');
+
+  const authSecret = crypto.randomUUID();
+  const authHash = crypto.createHash('sha256').update(authSecret).digest();
+  console.log(`  Auth Secret (auto-generated): ${authSecret}\n`);
+  console.log(`  Auth Hash: ${Buffer.from(authHash).toString('hex')}\n`);
+
+  console.log('  Calling initialize circuit...');
+  const initTx = await (deployed as any).callTx.initialize(authHash);
+  console.log(`  ✅ Initialized! Tx: ${initTx.public.txHash}\n`);
+
   recordDeployment(network, contractAddress, address.toString());
   console.log('  Saved to .midnight-state.json\n');
+
+  const stateJson = loadState();
+  if (stateJson) {
+    const dep = stateJson.deployments?.[network]?.whistleblower;
+    if (dep) {
+      dep.authSecret = authSecret;
+      const tmp = `${STATE_FILE_NAME}.tmp-${process.pid}-${Date.now()}`;
+      fs.writeFileSync(tmp, `${JSON.stringify(stateJson, null, 2)}\n`);
+      fs.renameSync(tmp, STATE_FILE_NAME);
+    }
+  }
 
   await persistWalletState(network, walletCtx);
   await walletCtx.wallet.stop();

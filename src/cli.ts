@@ -2,6 +2,7 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { WebSocket } from 'ws';
 
@@ -10,9 +11,32 @@ import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
 import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config-provider';
-import { resolveNetwork, getOrCreateSeed, getDeployment } from './network';
+import { resolveNetwork, getOrCreateSeed, getDeployment, loadState } from './network';
 import { createWallet, persistWalletState, unshieldedToken } from './wallet';
 import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-js';
+
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const feedbacksPath = resolve(process.cwd(), '.feedbacks.json');
+
+interface StoredFeedback {
+  txHash: string;
+  message: string;
+  timestamp: string;
+}
+
+function loadFeedbacks(): StoredFeedback[] {
+  if (!existsSync(feedbacksPath)) return [];
+  try { return JSON.parse(readFileSync(feedbacksPath, 'utf-8')); }
+  catch { return []; }
+}
+
+function saveFeedback(txHash: string, message: string): void {
+  const list = loadFeedbacks();
+  list.push({ txHash, message, timestamp: new Date().toISOString() });
+  writeFileSync(feedbacksPath, JSON.stringify(list, null, 2));
+}
 
 globalThis.WebSocket = WebSocket;
 
@@ -33,7 +57,7 @@ if (!fs.existsSync(contractPath)) {
 
 const Whistleblower = await import(pathToFileURL(contractPath).href);
 const contractIndexPath = path.resolve(__dirname, '..', 'contract', 'src', 'index.ts');
-const { CompiledWhistleblowerContractContract } = await import(pathToFileURL(contractIndexPath).href);
+const { CompiledWhistleblowerContractContract, createWhistleblowerPrivateState } = await import(pathToFileURL(contractIndexPath).href);
 
 async function createProviders(walletCtx: any) {
   const privateStatePassword = process.env.PRIVATE_STATE_PASSWORD?.trim() || 'Local-Devnet-Development-Placeholder-1';
@@ -82,6 +106,13 @@ async function main() {
     console.error(`No deploy on file for network ${network}. Run \`npm run setup -- --network ${network}\` first.`);
     process.exit(1);
   }
+  const state = loadState();
+  const authSecret = deployment.authSecret || state?.deployments?.[network]?.whistleblower?.authSecret;
+  if (!authSecret) {
+    console.error('  ❌ No auth secret found. Redeploy the contract.\n');
+    process.exit(1);
+  }
+
   console.log(`  Contract: ${deployment.address}`);
   console.log(`  Network: ${network}\n`);
 
@@ -125,7 +156,7 @@ async function main() {
       compiledContract: CompiledWhistleblowerContractContract as any,
       contractAddress: deployment.address,
       privateStateId: PRIVATE_STATE_ID,
-      initialPrivateState: { credential: BigInt(0) },
+      initialPrivateState: createWhistleblowerPrivateState(),
     });
 
     console.log('  ✅ Connected!\n');
@@ -143,15 +174,16 @@ async function main() {
 
       switch (choice.trim()) {
         case '1': {
-          const credentialStr = await rl.question('  Enter your credential (as a decimal number): ');
-          const credential = BigInt(credentialStr.trim());
           const feedback = await rl.question('  Enter your feedback: ');
-          console.log('\n  Submitting transaction (this may take 30-60 seconds)...');
+          console.log('\n  Generating ZK proof and submitting (this may take 30-60 seconds)...');
           try {
-            const tx = await deployed.callTx.submitFeedback(credential, feedback);
+            const credHash = crypto.createHash('sha256').update(authSecret).digest();
+            const tx = await deployed.callTx.submitFeedback(feedback.trim(), credHash);
+            saveFeedback(tx.public.txHash, feedback.trim());
             console.log(`\n  ✅ Feedback submitted successfully!`);
             console.log(`  Transaction ID: ${tx.public.txHash}`);
-            console.log(`  Block height: ${tx.public.blockHeight}\n`);
+            console.log(`  Block height: ${tx.public.blockHeight}`);
+            console.log(`  Verified: https://explorer.preview.midnight.network/tx/${tx.public.txHash}\n`);
           } catch (error) {
             console.error('\n  ❌ Failed:', error instanceof Error ? error.message : error);
           }
@@ -159,19 +191,22 @@ async function main() {
         }
 
         case '2': {
-          console.log('\n  Reading feedbacks from blockchain...');
-          try {
-            const contractState = await providers.publicDataProvider.queryContractState(deployment.address);
-            if (contractState) {
-              const ledgerState = Whistleblower.ledger(contractState.data);
-              console.log(`\n  Feedbacks: ${ledgerState.feedbackCount} total`);
-              console.log(`  Nullifiers: ${ledgerState.nullifierCount}`);
-              console.log(`  Sequence: ${ledgerState.sequence}\n`);
-            } else {
-              console.log('\n  No contract state found\n');
-            }
-          } catch (error) {
-            console.error('\n  ❌ Failed:', error instanceof Error ? error.message : error);
+          const stored = loadFeedbacks();
+          const contractState = await providers.publicDataProvider.queryContractState(deployment.address);
+          const ledgerState = contractState ? Whistleblower.ledger(contractState.data) : null;
+          const chainCount = ledgerState ? Number(ledgerState.feedbackCount) : 0;
+          const authHex = ledgerState ? Buffer.from(ledgerState.authorizationSecret).toString('hex').slice(0, 16) : '?';
+          console.log(`\n  On-chain count: ${chainCount}  |  Auth secret hash: ${authHex}...  |  Stored locally: ${stored.length}\n`);
+          if (stored.length === 0) {
+            console.log('  No feedbacks yet.\n');
+          } else {
+            stored.forEach((fb, i) => {
+              console.log(`  [${i + 1}] ${fb.message}`);
+              console.log(`       Tx: ${fb.txHash}`);
+              console.log(`       At: ${new Date(fb.timestamp).toLocaleString()}`);
+              console.log(`       Verify: https://explorer.preview.midnight.network/tx/${fb.txHash}`);
+              console.log('');
+            });
           }
           break;
         }
@@ -187,18 +222,14 @@ async function main() {
         }
 
         case '4': {
-          const credentialStr = await rl.question('  Enter your credential to check (decimal): ');
-          try {
-            const credential = BigInt(credentialStr.trim());
-            const contractState = await providers.publicDataProvider.queryContractState(deployment.address);
-            if (contractState) {
-              const ledgerState = Whistleblower.ledger(contractState.data);
-              const authSecret = ledgerState.authorizationSecret;
-              const isAuth = credential === authSecret;
-              console.log(`\n  Authorization: ${isAuth ? '✅ Authorized' : '❌ Not authorized'}\n`);
-            }
-          } catch (error) {
-            console.error('\n  ❌ Failed:', error instanceof Error ? error.message : error);
+          const contractState = await providers.publicDataProvider.queryContractState(deployment.address);
+          if (contractState) {
+            const ledgerState = Whistleblower.ledger(contractState.data);
+            const authHex = Buffer.from(ledgerState.authorizationSecret).toString('hex');
+            const secretPreview = authSecret.length > 8 ? `${authSecret.slice(0, 8)}...${authSecret.slice(-4)}` : authSecret;
+            console.log(`\n  Auth secret: ${secretPreview}`);
+            console.log(`  Auth hash (on-chain): ${authHex.slice(0, 16)}...`);
+            console.log(`  Authorization: Wallet connects → credential auto-injected → circuit validates → ZK proof generated\n`);
           }
           break;
         }
