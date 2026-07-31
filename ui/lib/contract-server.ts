@@ -82,8 +82,13 @@ export async function loadFeedbacks(): Promise<FeedbackEntry[]> {
   return (await loadFeedbacksFromStore()) as FeedbackEntry[];
 }
 
-export async function saveFeedback(message: string, txHash: string): Promise<FeedbackEntry> {
-  return (await appendFeedback(message, txHash)) as FeedbackEntry;
+export async function saveFeedback(message: string, txHash: string): Promise<{
+  entry: FeedbackEntry;
+  persisted: 'redis' | 'file' | 'none';
+  error?: string;
+}> {
+  const result = await appendFeedback(message, txHash);
+  return { entry: result.entry as FeedbackEntry, persisted: result.persisted, error: result.error };
 }
 
 export async function queryChainCount(address: string, network: string): Promise<number | null> {

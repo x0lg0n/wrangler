@@ -71,5 +71,5 @@ export async function loadFeedbacks(): Promise<FeedbackEntry[]> {
 }
 
 export async function saveFeedback(message: string, deployment: Deployment): Promise<FeedbackEntry> {
-  return (await appendFeedback(message, `${deployment.address.slice(0, 16)}-`)) as FeedbackEntry;
+  return (await appendFeedback(message, `${deployment.address.slice(0, 16)}-`)).entry as unknown as FeedbackEntry;
 }

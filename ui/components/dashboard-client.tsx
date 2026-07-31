@@ -37,7 +37,7 @@ export default function DashboardClient({
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [stage, setStage] = useState<string | null>(null);
-  const [result, setResult] = useState<{ ok: boolean; text: string; txId?: string } | null>(null);
+  const [result, setResult] = useState<{ ok: boolean; text: string; txId?: string; warning?: string } | null>(null);
   const [feedbacks, setFeedbacks] = useState<FeedbackEntry[]>(initialFeedbacks);
   const [totalCount, setTotalCount] = useState(initialCount);
   const [walletAddr, setWalletAddr] = useState<string | null>(null);
@@ -87,6 +87,7 @@ export default function DashboardClient({
           ok: true,
           text: 'ZK proof verified! Feedback submitted via your wallet.',
           txId: res.entry.txId,
+          warning: res.warning,
         });
         setMessage('');
         setFeedbacks((prev) => [...prev, res.entry!]);
@@ -338,6 +339,11 @@ export default function DashboardClient({
                     >
                       View on explorer: {result.txId}
                     </a>
+                  </div>
+                )}
+                {result.warning && (
+                  <div className="mt-1.5 text-[11px] text-amber-500">
+                    Stored in this session only — Redis save failed: {result.warning}
                   </div>
                 )}
               </div>

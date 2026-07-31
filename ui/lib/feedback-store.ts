@@ -99,7 +99,7 @@ export async function loadFeedbacksFromStore(): Promise<StoredFeedback[]> {
 export async function appendFeedback(
   message: string,
   txId?: string,
-): Promise<StoredFeedback> {
+): Promise<{ entry: StoredFeedback; persisted: 'redis' | 'file' | 'none'; error?: string }> {
   const entry: StoredFeedback = {
     id: 0,
     message,
@@ -111,9 +111,22 @@ export async function appendFeedback(
     try {
       entry.id = (await c.llen(KV_KEY)) + 1;
       await c.lpush(KV_KEY, JSON.stringify(entry));
-      return entry;
-    } catch {
-      // redis unavailable: fall through to the local file
+      return { entry, persisted: 'redis' };
+    } catch (err: any) {
+      // redis write failed: surface the reason, fall through to the local file
+      try {
+        const list = localFeedbacks();
+        entry.id = list.reduce((max, f) => Math.max(max, f.id ?? 0), 0) + 1;
+        list.push(entry);
+        writeFileSync(feedbacksPath, JSON.stringify(list, null, 2));
+        return { entry, persisted: 'file', error: err?.message ?? String(err) };
+      } catch (fileErr: any) {
+        return {
+          entry,
+          persisted: 'none',
+          error: `${err?.message ?? String(err)}; file fallback: ${fileErr?.message ?? String(fileErr)}`,
+        };
+      }
     }
   }
   const list = localFeedbacks();
@@ -121,8 +134,8 @@ export async function appendFeedback(
   list.push(entry);
   try {
     writeFileSync(feedbacksPath, JSON.stringify(list, null, 2));
-  } catch {
-    // read-only filesystem (serverless): keep the entry in memory only
+    return { entry, persisted: 'file' };
+  } catch (err: any) {
+    return { entry, persisted: 'none', error: err?.message ?? String(err) };
   }
-  return entry;
 }
