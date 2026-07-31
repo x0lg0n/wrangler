@@ -35,9 +35,11 @@ environment variables instead of local files:
 ## 🎥 Demo Video
 
 Watch the full flow — deployment state, wallet connection, ZK-proving, and on-chain
-submission (1 minute):
+submission (2.5 minutes):
 
 <video src="./demo/wrangler-demo.mp4" controls></video>
+
+Prefer watching elsewhere? [Open the demo video on Google Drive](https://drive.google.com/file/d/15t6jyyZLcFYVmNGRPjo596uKoMjolqjm/view?usp=sharing).
 
 ---
 
