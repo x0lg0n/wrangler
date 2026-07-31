@@ -28,8 +28,7 @@ export type WranglerProviders = MidnightProviders<
   WranglerPrivateState
 >;
 
-export type DeployedWranglerContract =
-  FoundContract<WranglerContract>;
+export type DeployedWranglerContract = FoundContract<WranglerContract>;
 
 export type WranglerDerivedState = {
   readonly feedbackCount: bigint;
