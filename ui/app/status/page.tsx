@@ -102,7 +102,7 @@ export default async function StatusPage() {
           <div>
             <h1 className="mb-1.5 text-[28px] font-bold tracking-[-0.5px]">System Status</h1>
             <p className="max-w-[560px] text-sm leading-[1.7] text-muted-foreground">
-              Live overview of the Midnight whistleblower deployment, its infrastructure
+              Live overview of the Wrangler deployment, its infrastructure
               dependencies, and the on-chain state of the application.
             </p>
           </div>

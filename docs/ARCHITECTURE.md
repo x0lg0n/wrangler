@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Midnight Whistleblower Protocol uses a **three-tier architecture**:
+The Midnight Wrangler Protocol uses a **three-tier architecture**:
 
 1. **Compact Smart Contract** — On-chain ZK circuits
 2. **TypeScript API Layer** — Contract interaction, deployment, state observation
@@ -22,14 +22,14 @@ The Midnight Whistleblower Protocol uses a **three-tier architecture**:
 ## Key Components
 
 ### Contract Layer (`contract/`)
-- `whistleblower.compact` — Compact source defining 3 circuits
+- `wrangler.compact` — Compact source defining 3 circuits
 - `witnesses.ts` — Private state type and factory
 - `index.ts` — TypeScript wrapper with `CompiledContract.make().pipe(withVacantWitnesses)`
 - `managed/` — Compiled output: `.zkir` (circuit IR), `.prover`/`.verifier` (keys)
 
 ### API Layer (`api/src/`)
-- `common-types.ts` — `WhistleblowerProviders`, `WhistleblowerDerivedState`, contract types
-- `index.ts` — `WhistleblowerAPI` class with `deploy()`, `join()`, `submitFeedback()`, `getFeedbacks()`
+- `common-types.ts` — `WranglerProviders`, `WranglerDerivedState`, contract types
+- `index.ts` — `WranglerAPI` class with `deploy()`, `join()`, `submitFeedback()`, `getFeedbacks()`
 - `utils/index.ts` — `randomBytes`, `toHex`
 
 ### Deployment Layer (`src/`)

@@ -1,3 +1,3 @@
-export type WhistleblowerPrivateState = Record<string, never>;
+export type WranglerPrivateState = Record<string, never>;
 
-export const createWhistleblowerPrivateState = () => ({});
+export const createWranglerPrivateState = () => ({});

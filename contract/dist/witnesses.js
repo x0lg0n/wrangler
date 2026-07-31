@@ -1,2 +1,2 @@
-export const createWhistleblowerPrivateState = () => ({});
+export const createWranglerPrivateState = () => ({});
 //# sourceMappingURL=witnesses.js.map

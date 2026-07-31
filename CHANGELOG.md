@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Network switching: local devnet, preview, preprod
 
 ### Changed
-- Forked from Midnight Network bulletin-board template; rewrote contract for whistleblower use case
+- Forked from Midnight Network bulletin-board template; rewrote contract for anonymous feedback use case
 
 ### Security
 - Authorization through ZK circuit verification (no on-chain identity exposure)

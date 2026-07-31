@@ -15,7 +15,7 @@ async function main(): Promise<void> {
   if (flag) setActiveNetwork(flag);
   const { network, config } = resolveNetwork({ argv });
 
-  process.stdout.write(`\n→ Setting up Whistleblower Protocol on network: ${network}\n\n`);
+  process.stdout.write(`\n→ Setting up Wrangler Protocol on network: ${network}\n\n`);
 
   run('docker', ['compose', 'up', '-d', '--wait', ...config.composeServices]);
 

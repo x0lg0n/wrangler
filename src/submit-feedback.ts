@@ -25,7 +25,7 @@ import {
 
 globalThis.WebSocket = WebSocket;
 
-const PRIVATE_STATE_ID = 'whistleblowerPrivateState';
+const PRIVATE_STATE_ID = 'wranglerPrivateState';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -84,7 +84,7 @@ async function main() {
   }
 
   const network: string = state.activeNetwork;
-  const dep = state.deployments?.[network]?.whistleblower;
+  const dep = state.deployments?.[network]?.wrangler;
   if (!dep) {
     process.stderr.write(`No deployment for network "${network}".\n`);
     process.exit(1);
@@ -109,7 +109,7 @@ async function main() {
   }
 
   const contractIndexPath = path.resolve(rootDir, 'contract', 'src', 'index.ts');
-  const { CompiledWhistleblowerContractContract, createWhistleblowerPrivateState } = await import(pathToFileURL(contractIndexPath).href);
+  const { CompiledWranglerContractContract, createWranglerPrivateState } = await import(pathToFileURL(contractIndexPath).href);
 
   setNetworkId(network as any);
 
@@ -160,7 +160,7 @@ async function main() {
 
   const providers = {
     privateStateProvider: levelPrivateStateProvider({
-      privateStateStoreName: 'whistleblower-state',
+      privateStateStoreName: 'wrangler-state',
       accountId,
       privateStoragePasswordProvider: () => privateStatePassword,
     }),
@@ -172,10 +172,10 @@ async function main() {
   };
 
   const deployed = await findDeployedContract(providers, {
-    compiledContract: CompiledWhistleblowerContractContract as any,
+    compiledContract: CompiledWranglerContractContract as any,
     contractAddress: dep.address,
     privateStateId: PRIVATE_STATE_ID,
-    initialPrivateState: createWhistleblowerPrivateState(),
+    initialPrivateState: createWranglerPrivateState(),
   });
 
   const credHash = crypto.createHash('sha256').update(authSecret).digest();

@@ -32,8 +32,8 @@ describe("Contract compilation", () => {
 });
 
 describe("Contract source", () => {
-  it("whistleblower.compact exists and contains expected circuits", () => {
-    const compactFile = path.join(projectRoot, "contract", "src", "whistleblower.compact");
+  it("wrangler.compact exists and contains expected circuits", () => {
+    const compactFile = path.join(projectRoot, "contract", "src", "wrangler.compact");
     expect(fs.existsSync(compactFile)).toBe(true);
     const contents = fs.readFileSync(compactFile, "utf-8");
     expect(contents).toContain("circuit initialize");
@@ -41,7 +41,7 @@ describe("Contract source", () => {
   });
 
   it("contract uses authorize-then-disclose pattern", () => {
-    const compactFile = path.join(projectRoot, "contract", "src", "whistleblower.compact");
+    const compactFile = path.join(projectRoot, "contract", "src", "wrangler.compact");
     const contents = fs.readFileSync(compactFile, "utf-8");
     expect(contents).toContain("credential == authorizationSecret");
     expect(contents).toContain("disclose(feedback)");
@@ -51,35 +51,35 @@ describe("Contract source", () => {
 
 describe("Witnesses (private state)", () => {
   it("private state is empty (no identity or credential in witness state)", async () => {
-    const { createWhistleblowerPrivateState } = await import(
+    const { createWranglerPrivateState } = await import(
       path.join(projectRoot, "contract", "src", "witnesses.ts")
     );
-    const state = createWhistleblowerPrivateState();
+    const state = createWranglerPrivateState();
     expect(state).toEqual({});
   });
 
   it("private state is identical across users (credential lives off-chain)", async () => {
-    const { createWhistleblowerPrivateState } = await import(
+    const { createWranglerPrivateState } = await import(
       path.join(projectRoot, "contract", "src", "witnesses.ts")
     );
-    expect(createWhistleblowerPrivateState()).toEqual(createWhistleblowerPrivateState());
+    expect(createWranglerPrivateState()).toEqual(createWranglerPrivateState());
   });
 });
 
 describe("TypeScript API", () => {
   it("common-types exports expected types", async () => {
     const common = await import(path.join(projectRoot, "api", "src", "common-types.ts"));
-    expect(common.whistleblowerPrivateStateKey).toBeDefined();
-    expect(typeof common.whistleblowerPrivateStateKey).toBe("string");
+    expect(common.wranglerPrivateStateKey).toBeDefined();
+    expect(typeof common.wranglerPrivateStateKey).toBe("string");
   });
 
   it("API class is exported", async () => {
     const api = await import(path.join(projectRoot, "api", "src", "index"));
-    expect(api.WhistleblowerAPI).toBeDefined();
+    expect(api.WranglerAPI).toBeDefined();
   });
 
   it("common-types re-exported from API", async () => {
     const api = await import(path.join(projectRoot, "api", "src", "index"));
-    expect(api.whistleblowerPrivateStateKey).toBeDefined();
+    expect(api.wranglerPrivateStateKey).toBeDefined();
   });
 });

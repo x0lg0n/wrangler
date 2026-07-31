@@ -1,5 +1,5 @@
 {
-  "name": "@midnight-ntwrk/whistleblower-api",
+  "name": "@midnight-ntwrk/wrangler-api",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

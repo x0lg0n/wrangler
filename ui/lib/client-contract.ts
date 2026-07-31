@@ -8,8 +8,8 @@ import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-pri
 import { findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import { createProofProvider } from '@midnight-ntwrk/midnight-js-types';
 import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-js';
-import * as WhistleblowerModule from '@midnight-ntwrk/whistleblower-contract';
-import { createWhistleblowerPrivateState } from '@midnight-ntwrk/whistleblower-contract';
+import * as WranglerModule from '@midnight-ntwrk/wrangler-contract';
+import { createWranglerPrivateState } from '@midnight-ntwrk/wrangler-contract';
 
 let ledger: any = null;
 
@@ -90,7 +90,7 @@ export async function submitFeedbackViaWallet(
     : 'wss://indexer.preview.midnight.network/api/v4/graphql/ws';
 
   const privateStateProvider = levelPrivateStateProvider({
-    privateStateStoreName: 'whistleblower-state',
+    privateStateStoreName: 'wrangler-state',
     accountId,
     privateStoragePasswordProvider: () => 'Local-Devnet-Development-Placeholder-1',
   });
@@ -104,7 +104,7 @@ export async function submitFeedbackViaWallet(
 
   const compiledContract = CompiledContract.make(
     'Whistleblower',
-    WhistleblowerModule.Contract,
+    WranglerModule.Contract,
   ).pipe(CompiledContract.withVacantWitnesses);
 
   const providers = {
@@ -120,8 +120,8 @@ export async function submitFeedbackViaWallet(
   const deployed = await findDeployedContract(providers, {
     compiledContract: compiledContract as any,
     contractAddress,
-    privateStateId: 'whistleblowerPrivateState',
-    initialPrivateState: createWhistleblowerPrivateState(),
+    privateStateId: 'wranglerPrivateState',
+    initialPrivateState: createWranglerPrivateState(),
   });
 
   const credBytes = new TextEncoder().encode(authSecret);

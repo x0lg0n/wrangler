@@ -47,7 +47,7 @@ export function readState(): { deployment: Deployment | null; error: string | nu
     const raw = readFileSync(statePath, 'utf-8');
     const state: State = JSON.parse(raw);
     const network = state.activeNetwork;
-    const deployment = state.deployments[network]?.whistleblower;
+    const deployment = state.deployments[network]?.wrangler;
     if (!deployment) {
       return { deployment: null, error: `No deployment found for network "${network}".` };
     }

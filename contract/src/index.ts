@@ -3,13 +3,13 @@ import { CompiledContract } from "@midnight-ntwrk/midnight-js-protocol/compact-j
 export * from "./managed/whistleblower/contract/index.js";
 export * from "./witnesses";
 
-import * as CompiledWhistleblowerContract from "./managed/whistleblower/contract/index.js";
+import * as CompiledWranglerContract from "./managed/whistleblower/contract/index.js";
 
-export const CompiledWhistleblowerContractContract = CompiledContract.make<
-  CompiledWhistleblowerContract.Contract<Record<string, never>>
+export const CompiledWranglerContractContract = CompiledContract.make<
+  CompiledWranglerContract.Contract<Record<string, never>>
 >(
   "Whistleblower",
-  CompiledWhistleblowerContract.Contract<Record<string, never>>,
+  CompiledWranglerContract.Contract<Record<string, never>>,
 ).pipe(
   CompiledContract.withVacantWitnesses,
   CompiledContract.withCompiledFileAssets("./managed/whistleblower"),

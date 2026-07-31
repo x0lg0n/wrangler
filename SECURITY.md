@@ -1,6 +1,6 @@
 # Security Policy
 
-The Midnight Whistleblower Protocol uses Zero-Knowledge Proofs for authorization —
+The Midnight Wrangler Protocol uses Zero-Knowledge Proofs for authorization —
 the security of the system depends on the integrity of the circuits and the
 confidentiality of authorization credentials.
 

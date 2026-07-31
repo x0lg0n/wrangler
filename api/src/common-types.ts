@@ -1,37 +1,37 @@
 import { type MidnightProviders } from "@midnight-ntwrk/midnight-js-types";
 import { type FoundContract } from "@midnight-ntwrk/midnight-js-contracts";
 import type {
-  WhistleblowerPrivateState,
+  WranglerPrivateState,
   Contract,
 } from "../../contract/src/index.js";
 
-export const whistleblowerPrivateStateKey = "whistleblowerPrivateState";
-export type PrivateStateId = typeof whistleblowerPrivateStateKey;
+export const wranglerPrivateStateKey = "wranglerPrivateState";
+export type PrivateStateId = typeof wranglerPrivateStateKey;
 
 export type PrivateStates = {
-  readonly whistleblowerPrivateState: WhistleblowerPrivateState;
+  readonly wranglerPrivateState: WranglerPrivateState;
 };
 
-export type WhistleblowerContract = Contract<
-  WhistleblowerPrivateState,
+export type WranglerContract = Contract<
+  WranglerPrivateState,
   Record<string, never>
 >;
 
-export type WhistleblowerCircuitKeys = Exclude<
-  keyof WhistleblowerContract["impureCircuits"],
+export type WranglerCircuitKeys = Exclude<
+  keyof WranglerContract["impureCircuits"],
   number | symbol
 >;
 
-export type WhistleblowerProviders = MidnightProviders<
-  WhistleblowerCircuitKeys,
+export type WranglerProviders = MidnightProviders<
+  WranglerCircuitKeys,
   PrivateStateId,
-  WhistleblowerPrivateState
+  WranglerPrivateState
 >;
 
-export type DeployedWhistleblowerContract =
-  FoundContract<WhistleblowerContract>;
+export type DeployedWranglerContract =
+  FoundContract<WranglerContract>;
 
-export type WhistleblowerDerivedState = {
+export type WranglerDerivedState = {
   readonly feedbackCount: bigint;
   readonly authorizationSecret: Uint8Array;
 };

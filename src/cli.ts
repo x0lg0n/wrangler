@@ -40,7 +40,7 @@ function saveFeedback(txHash: string, message: string): void {
 
 globalThis.WebSocket = WebSocket;
 
-const PRIVATE_STATE_ID = 'whistleblowerPrivateState';
+const PRIVATE_STATE_ID = 'wranglerPrivateState';
 
 const { network, config: networkConfig } = resolveNetwork();
 const SEED = getOrCreateSeed(network);
@@ -55,9 +55,9 @@ if (!fs.existsSync(contractPath)) {
   process.exit(1);
 }
 
-const Whistleblower = await import(pathToFileURL(contractPath).href);
+const Wrangler = await import(pathToFileURL(contractPath).href);
 const contractIndexPath = path.resolve(__dirname, '..', 'contract', 'src', 'index.ts');
-const { CompiledWhistleblowerContractContract, createWhistleblowerPrivateState } = await import(pathToFileURL(contractIndexPath).href);
+const { CompiledWranglerContractContract, createWranglerPrivateState } = await import(pathToFileURL(contractIndexPath).href);
 
 async function createProviders(walletCtx: any) {
   const privateStatePassword = process.env.PRIVATE_STATE_PASSWORD?.trim() || 'Local-Devnet-Development-Placeholder-1';
@@ -81,7 +81,7 @@ async function createProviders(walletCtx: any) {
 
   return {
     privateStateProvider: levelPrivateStateProvider({
-      privateStateStoreName: 'whistleblower-state',
+      privateStateStoreName: 'wrangler-state',
       accountId,
       privateStoragePasswordProvider: () => privateStatePassword,
     }),
@@ -95,7 +95,7 @@ async function createProviders(walletCtx: any) {
 
 async function main() {
   console.log('\n╔══════════════════════════════════════════════════════════════╗');
-  console.log('║         ZK-Whistleblower Protocol — CLI                    ║');
+  console.log('║         ZK-Wrangler Protocol — CLI                    ║');
   console.log('╚══════════════════════════════════════════════════════════════╝\n');
 
   const rl = createInterface({ input: stdin, output: stdout });
@@ -107,7 +107,7 @@ async function main() {
     process.exit(1);
   }
   const state = loadState();
-  const authSecret = deployment.authSecret || state?.deployments?.[network]?.whistleblower?.authSecret;
+  const authSecret = deployment.authSecret || state?.deployments?.[network]?.wrangler?.authSecret;
   if (!authSecret) {
     console.error('  ❌ No auth secret found. Redeploy the contract.\n');
     process.exit(1);
@@ -153,10 +153,10 @@ async function main() {
     const providers = await createProviders(walletCtx);
 
     const deployed: any = await findDeployedContract(providers, {
-      compiledContract: CompiledWhistleblowerContractContract as any,
+      compiledContract: CompiledWranglerContractContract as any,
       contractAddress: deployment.address,
       privateStateId: PRIVATE_STATE_ID,
-      initialPrivateState: createWhistleblowerPrivateState(),
+      initialPrivateState: createWranglerPrivateState(),
     });
 
     console.log('  ✅ Connected!\n');
@@ -193,7 +193,7 @@ async function main() {
         case '2': {
           const stored = loadFeedbacks();
           const contractState = await providers.publicDataProvider.queryContractState(deployment.address);
-          const ledgerState = contractState ? Whistleblower.ledger(contractState.data) : null;
+          const ledgerState = contractState ? Wrangler.ledger(contractState.data) : null;
           const chainCount = ledgerState ? Number(ledgerState.feedbackCount) : 0;
           const authHex = ledgerState ? Buffer.from(ledgerState.authorizationSecret).toString('hex').slice(0, 16) : '?';
           console.log(`\n  On-chain count: ${chainCount}  |  Auth secret hash: ${authHex}...  |  Stored locally: ${stored.length}\n`);
@@ -224,7 +224,7 @@ async function main() {
         case '4': {
           const contractState = await providers.publicDataProvider.queryContractState(deployment.address);
           if (contractState) {
-            const ledgerState = Whistleblower.ledger(contractState.data);
+            const ledgerState = Wrangler.ledger(contractState.data);
             const authHex = Buffer.from(ledgerState.authorizationSecret).toString('hex');
             const secretPreview = authSecret.length > 8 ? `${authSecret.slice(0, 8)}...${authSecret.slice(-4)}` : authSecret;
             console.log(`\n  Auth secret: ${secretPreview}`);

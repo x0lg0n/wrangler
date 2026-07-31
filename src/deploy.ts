@@ -16,7 +16,7 @@ import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-j
 
 globalThis.WebSocket = WebSocket;
 
-const PRIVATE_STATE_ID = 'whistleblowerPrivateState';
+const PRIVATE_STATE_ID = 'wranglerPrivateState';
 
 const { network, config: networkConfig } = resolveNetwork();
 const SEED = getOrCreateSeed(network);
@@ -52,11 +52,11 @@ if (!fs.existsSync(contractPath)) {
   process.exit(1);
 }
 
-const Whistleblower = await import(pathToFileURL(contractPath).href);
+const Wrangler = await import(pathToFileURL(contractPath).href);
 const witnessesPath = path.resolve(__dirname, '..', 'contract', 'src', 'witnesses.ts');
 const contractIndexPath = path.resolve(__dirname, '..', 'contract', 'src', 'index.ts');
-const { createWhistleblowerPrivateState } = await import(pathToFileURL(witnessesPath).href);
-const { CompiledWhistleblowerContractContract } = await import(pathToFileURL(contractIndexPath).href);
+const { createWranglerPrivateState } = await import(pathToFileURL(witnessesPath).href);
+const { CompiledWranglerContractContract } = await import(pathToFileURL(contractIndexPath).href);
 
 async function createProviders(walletCtx: any) {
   const privateStatePassword = process.env.PRIVATE_STATE_PASSWORD?.trim() || 'Local-Devnet-Development-Placeholder-1';
@@ -80,7 +80,7 @@ async function createProviders(walletCtx: any) {
 
   return {
     privateStateProvider: levelPrivateStateProvider({
-      privateStateStoreName: 'whistleblower-state',
+      privateStateStoreName: 'wrangler-state',
       accountId,
       privateStoragePasswordProvider: () => privateStatePassword,
     }),
@@ -94,7 +94,7 @@ async function createProviders(walletCtx: any) {
 
 async function main() {
   console.log('\n╔══════════════════════════════════════════════════════════════╗');
-  console.log(`║  Deploy Whistleblower to ${network}`);
+  console.log(`║  Deploy Wrangler to ${network}`);
   console.log('╚══════════════════════════════════════════════════════════════╝\n');
 
   const seed = SEED;
@@ -227,9 +227,9 @@ async function main() {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       deployed = await deployContract(providers, {
-        compiledContract: CompiledWhistleblowerContractContract as any,
+        compiledContract: CompiledWranglerContractContract as any,
         privateStateId: PRIVATE_STATE_ID,
-        initialPrivateState: createWhistleblowerPrivateState(),
+        initialPrivateState: createWranglerPrivateState(),
       });
       break;
     } catch (err: any) {
@@ -300,7 +300,7 @@ async function main() {
 
   const stateJson = loadState();
   if (stateJson) {
-    const dep = stateJson.deployments?.[network]?.whistleblower;
+    const dep = stateJson.deployments?.[network]?.wrangler;
     if (dep) {
       dep.authSecret = authSecret;
       const tmp = `${STATE_FILE_NAME}.tmp-${process.pid}-${Date.now()}`;

@@ -18,7 +18,7 @@ export default function Hero() {
       </h1>
 
       <p className="mb-10 max-w-[600px] text-lg leading-[1.7] text-muted-foreground">
-        The enterprise-grade whistleblower protocol. Submit mathematically verifiable feedback
+        The enterprise-grade anonymous feedback protocol. Submit mathematically verifiable feedback
         without ever revealing your identity to the public ledger.
       </p>
 

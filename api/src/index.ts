@@ -1,29 +1,29 @@
 import * as crypto from "node:crypto";
-import * as Whistleblower from "../../contract/src/managed/whistleblower/contract/index.js";
+import * as Wrangler from "../../contract/src/managed/whistleblower/contract/index.js";
 
 import { type ContractAddress } from "@midnight-ntwrk/midnight-js-protocol/compact-runtime";
 import { type Logger } from "pino";
 import {
-  type WhistleblowerDerivedState,
-  type WhistleblowerContract,
-  type WhistleblowerProviders,
-  type DeployedWhistleblowerContract,
-  whistleblowerPrivateStateKey,
+  type WranglerDerivedState,
+  type WranglerContract,
+  type WranglerProviders,
+  type DeployedWranglerContract,
+  wranglerPrivateStateKey,
 } from "./common-types.js";
-import { CompiledWhistleblowerContractContract } from "../../contract/src/index";
+import { CompiledWranglerContractContract } from "../../contract/src/index";
 import {
   deployContract,
   findDeployedContract,
 } from "@midnight-ntwrk/midnight-js-contracts";
 import { map, tap, type Observable } from "rxjs";
 import {
-  createWhistleblowerPrivateState,
-  type WhistleblowerPrivateState,
+  createWranglerPrivateState,
+  type WranglerPrivateState,
 } from "../../contract/src/witnesses.js";
 
-export interface DeployedWhistleblowerAPI {
+export interface DeployedWranglerAPI {
   readonly deployedContractAddress: ContractAddress;
-  readonly state$: Observable<WhistleblowerDerivedState>;
+  readonly state$: Observable<WranglerDerivedState>;
 
   submitFeedback: (
     feedback: string,
@@ -32,10 +32,10 @@ export interface DeployedWhistleblowerAPI {
   getFeedbackCount: () => Promise<bigint>;
 }
 
-export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
+export class WranglerAPI implements DeployedWranglerAPI {
   private constructor(
-    public readonly deployedContract: DeployedWhistleblowerContract,
-    private readonly providers: WhistleblowerProviders,
+    public readonly deployedContract: DeployedWranglerContract,
+    private readonly providers: WranglerProviders,
     private readonly logger?: Logger,
   ) {
     this.deployedContractAddress =
@@ -47,7 +47,7 @@ export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
       .contractStateObservable(this.deployedContractAddress, { type: "latest" })
       .pipe(
         map((contractState) => {
-          const ledgerState = Whistleblower.ledger(contractState.data);
+          const ledgerState = Wrangler.ledger(contractState.data);
           return {
             feedbackCount: ledgerState.feedbackCount,
             authorizationSecret: ledgerState.authorizationSecret,
@@ -63,7 +63,7 @@ export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
 
   readonly deployedContractAddress: ContractAddress;
 
-  readonly state$: Observable<WhistleblowerDerivedState>;
+  readonly state$: Observable<WranglerDerivedState>;
 
   async submitFeedback(
     feedback: string,
@@ -100,20 +100,20 @@ export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
         this.deployedContractAddress,
       );
     if (contractState === null) return 0n;
-    const ledgerState = Whistleblower.ledger(contractState.data);
+    const ledgerState = Wrangler.ledger(contractState.data);
     return ledgerState.feedbackCount;
   }
 
   static async deploy(
-    providers: WhistleblowerProviders,
+    providers: WranglerProviders,
     logger?: Logger,
-  ): Promise<WhistleblowerAPI> {
+  ): Promise<WranglerAPI> {
     logger?.info("deployContract");
 
     const deployedContract = await deployContract(providers, {
-      compiledContract: CompiledWhistleblowerContractContract,
-      privateStateId: whistleblowerPrivateStateKey,
-      initialPrivateState: createWhistleblowerPrivateState(),
+      compiledContract: CompiledWranglerContractContract,
+      privateStateId: wranglerPrivateStateKey,
+      initialPrivateState: createWranglerPrivateState(),
     });
 
     logger?.trace({
@@ -122,23 +122,23 @@ export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
       },
     });
 
-    return new WhistleblowerAPI(deployedContract, providers, logger);
+    return new WranglerAPI(deployedContract, providers, logger);
   }
 
   static async join(
-    providers: WhistleblowerProviders,
+    providers: WranglerProviders,
     contractAddress: ContractAddress,
     logger?: Logger,
-  ): Promise<WhistleblowerAPI> {
+  ): Promise<WranglerAPI> {
     logger?.info({ joinContract: { contractAddress } });
 
-    const deployedContract = await findDeployedContract<WhistleblowerContract>(
+    const deployedContract = await findDeployedContract<WranglerContract>(
       providers,
       {
         contractAddress,
-        compiledContract: CompiledWhistleblowerContractContract,
-        privateStateId: whistleblowerPrivateStateKey,
-        initialPrivateState: await WhistleblowerAPI.getPrivateState(
+        compiledContract: CompiledWranglerContractContract,
+        privateStateId: wranglerPrivateStateKey,
+        initialPrivateState: await WranglerAPI.getPrivateState(
           providers,
           contractAddress,
         ),
@@ -152,18 +152,18 @@ export class WhistleblowerAPI implements DeployedWhistleblowerAPI {
       },
     });
 
-    return new WhistleblowerAPI(deployedContract, providers, logger);
+    return new WranglerAPI(deployedContract, providers, logger);
   }
 
   private static async getPrivateState(
-    providers: WhistleblowerProviders,
+    providers: WranglerProviders,
     contractAddress: ContractAddress,
-  ): Promise<WhistleblowerPrivateState> {
+  ): Promise<WranglerPrivateState> {
     providers.privateStateProvider.setContractAddress(contractAddress);
     const existingPrivateState = await providers.privateStateProvider.get(
-      whistleblowerPrivateStateKey,
+      wranglerPrivateStateKey,
     );
-    return existingPrivateState ?? createWhistleblowerPrivateState();
+    return existingPrivateState ?? createWranglerPrivateState();
   }
 }
 

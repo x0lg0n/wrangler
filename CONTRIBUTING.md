@@ -1,11 +1,11 @@
-# Contributing to Midnight Whistleblower Protocol
+# Contributing to Wrangler
 
 We welcome contributions! Whether it's bug reports, feature requests, or pull requests, your help is appreciated.
 
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/<your-username>/whistleblower-protocol.git`
+2. Clone your fork: `git clone https://github.com/<your-username>/wrangler.git`
 3. Set up the dev environment (see [README](README.md#quick-start))
 4. Create a branch: `git checkout -b feature/my-feature`
 

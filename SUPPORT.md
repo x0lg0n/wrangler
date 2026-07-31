@@ -3,7 +3,7 @@
 ## Getting Help
 
 - **Documentation**: See [README](README.md) for setup and usage
-- **Issues**: Report bugs via [GitHub Issues](https://github.com/x0lg0n/whistleblower-protocol/issues)
+- **Issues**: Report bugs via [GitHub Issues](https://github.com/x0lg0n/wrangler/issues)
 - **Discussions**: Use GitHub Discussions for questions and ideas
 
 ## Troubleshooting

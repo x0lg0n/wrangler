@@ -137,7 +137,7 @@ witness would hold the credential itself.
 ## ⚙️ Smart Contract
 
 Written in [Compact](https://midnight.network/developers), Midnight's ZK smart-contract
-language. Source: [`contract/src/whistleblower.compact`](contract/src/whistleblower.compact).
+language. Source: [`contract/src/wrangler.compact`](contract/src/wrangler.compact).
 
 ### Circuits
 
@@ -161,7 +161,7 @@ authorizationSecret:  Bytes<32>     — disclosed at initialize; the submit cred
 wrangler/
 ├── contract/                  # Compact contract workspace
 │   └── src/
-│       ├── whistleblower.compact  # Contract source — 2 ZK circuits
+│       ├── wrangler.compact  # Contract source — 2 ZK circuits
 │       ├── witnesses.ts           # Private state factory (empty by design)
 │       └── managed/               # Compiled circuits + proving/verifying keys
 ├── ui/                        # Next.js web interface (workspace)
@@ -229,10 +229,10 @@ pnpm test
 
 - **Contract compilation** — compiled `managed/` circuits, generated contract API, keys
 - **Contract source** — the `initialize` / `submitFeedback` circuits and the
-  authorize-then-disclose pattern in `whistleblower.compact`
+  authorize-then-disclose pattern in `wrangler.compact`
 - **Witnesses** — the private state is empty by design: no identity or credential lives in
   witness state; the credential is the off-chain input to `submitFeedback`
-- **TypeScript API** — exported types and the `WhistleblowerAPI` class
+- **TypeScript API** — exported types and the `WranglerAPI` class
 
 Every push to `main` (and every pull request) runs compile, lint, typecheck, tests, and the
 UI production build via GitHub Actions — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).

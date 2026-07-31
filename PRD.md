@@ -1,10 +1,10 @@
 Product Requirements Document (PRD)
 
-Project Title: ZK-Verified Whistleblower & Feedback Protocol
+Project Title: Wrangler — ZK-Verified Anonymous Feedback Protocol
 
 1. Executive Summary
 
-The ZK-Verified Whistleblower & Feedback Protocol is a decentralized application (dApp) built on the Midnight Network. It aims to solve the enterprise "Transparency Paradox" by enabling pre-authorized stakeholders (e.g., employees, DAO members, or citizens) to submit anonymous but mathematically verifiable feedback. By utilizing Zero-Knowledge Proofs (ZKPs) via Midnight's Compact language, the protocol guarantees that only legitimate members can post, prevents spam/duplicate submissions through cryptographic nullifiers, and entirely obfuscates the submitter's identity from the public ledger.
+Wrangler is a decentralized application (dApp) built on the Midnight Network. It aims to solve the enterprise "Transparency Paradox" by enabling pre-authorized stakeholders (e.g., employees, DAO members, or citizens) to submit anonymous but mathematically verifiable feedback. By utilizing Zero-Knowledge Proofs (ZKPs) via Midnight's Compact language, the protocol guarantees that only legitimate members can post, prevents spam/duplicate submissions through cryptographic nullifiers, and entirely obfuscates the submitter's identity from the public ledger.
 
 2. Problem Statement
 
@@ -82,7 +82,7 @@ Tasks:
 
 Initialize the project and configure the Compact compiler backend (wasm).
 
-Write whistleblower.compact.
+Write wrangler.compact.
 
 Define the public feedback_list.
 

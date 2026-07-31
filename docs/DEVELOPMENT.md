@@ -12,7 +12,7 @@ pnpm run build
 
 ### Contract Development
 
-Edit `contract/src/whistleblower.compact`, then:
+Edit `contract/src/wrangler.compact`, then:
 
 ```bash
 pnpm run compact    # Recompile circuits

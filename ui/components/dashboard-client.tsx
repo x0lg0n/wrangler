@@ -135,7 +135,7 @@ export default function DashboardClient({
       {/* Page hero */}
       <div className="mb-9 flex items-start justify-between gap-6 pt-2">
         <div>
-          <h1 className="mb-1.5 text-[28px] font-bold tracking-[-0.5px]">Whistleblower Dashboard</h1>
+          <h1 className="mb-1.5 text-[28px] font-bold tracking-[-0.5px]">Wrangler Dashboard</h1>
           <p className="max-w-[560px] text-sm leading-[1.7] text-muted-foreground">
             Submit anonymous, ZK-verified feedback. Your identity stays hidden —
             your wallet signs and submits the transaction to the Midnight ledger.

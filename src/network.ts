@@ -228,7 +228,7 @@ export function getOrCreateSeed(network: NetworkId, opts: SeedOptions = {}): str
   return seed;
 }
 
-export function getDeployment(network: NetworkId, contractName: string = 'whistleblower', opts: FsOptions = {}): DeploymentRecord | null {
+export function getDeployment(network: NetworkId, contractName: string = 'wrangler', opts: FsOptions = {}): DeploymentRecord | null {
   const state = loadState(opts);
   const networkDeployments = state?.deployments?.[network];
   if (!networkDeployments) return null;
@@ -241,7 +241,7 @@ export function recordDeployment(
   deployer: string,
   opts: FsOptions = {},
 ): void {
-  recordContractDeployment(network, 'whistleblower', address, deployer, opts);
+  recordContractDeployment(network, 'wrangler', address, deployer, opts);
 }
 
 export function recordContractDeployment(

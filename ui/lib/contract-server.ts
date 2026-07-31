@@ -53,7 +53,7 @@ export function readDeployment(): { deployment: Deployment | null; error: string
     const raw = readFileSync(statePath, 'utf-8');
     const state: StateJson = JSON.parse(raw);
     const network = state.activeNetwork;
-    const dep = state.deployments[network]?.whistleblower;
+    const dep = state.deployments[network]?.wrangler;
     if (!dep) {
       return { deployment: null, error: `No deployment for network "${network}".` };
     }
@@ -70,7 +70,7 @@ export function readAuthSecret(): string | null {
     if (!existsSync(statePath)) return null;
     const raw = readFileSync(statePath, 'utf-8');
     const state: StateJson = JSON.parse(raw);
-    const dep = state.deployments[state.activeNetwork]?.whistleblower;
+    const dep = state.deployments[state.activeNetwork]?.wrangler;
     return dep?.authSecret ?? null;
   } catch {
     return null;
