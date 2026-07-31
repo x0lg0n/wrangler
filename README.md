@@ -33,11 +33,10 @@ environment variables instead of local files:
 
 ## 🎥 Demo Video
 
-Watch the full flow — deploy state, wallet connection, ZK-proving, and on-chain submission:
+Watch the full flow — deployment state, wallet connection, ZK-proving, and on-chain
+submission (1 minute):
 
-**▶ [Demo video (1 min)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)**
-
-*(Replace `YOUR_VIDEO_ID` with the uploaded video's ID.)*
+<video src="./demo/wrangler-demo.mp4" controls></video>
 
 ---
 
