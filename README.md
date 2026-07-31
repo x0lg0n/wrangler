@@ -16,7 +16,7 @@
 
 ## 🌐 Live Demo
 
-**[wrangler-ui-69yl.vercel.app](https://wrangler-ui-69yl.vercel.app)** — deployed to Vercel,
+**[Wrangler](https://wrangler-midnight.vercel.app/)** — deployed to Vercel,
 contract live on the **Midnight Preview network**.
 
 The on-chain feedback count is read live from the indexer. To submit a piece of feedback,
@@ -30,6 +30,28 @@ environment variables instead of local files:
 | `MIDNIGHT_FEEDBACKS` | JSON array of feedback entries (display seed) |
 
 ---
+
+## 🎥 Demo Video
+
+Watch the full flow — deploy state, wallet connection, ZK-proving, and on-chain submission:
+
+**▶ [Demo video (1 min)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)**
+
+*(Replace `YOUR_VIDEO_ID` with the uploaded video's ID.)*
+
+---
+
+## 📸 Screenshots
+
+| Compile Output | Contract Deployment (Preview) |
+|:---:|:---:|
+| ![compile](./screenshots/compile-output.png) | ![deploy](./screenshots/contract-deploy.png) |
+| `pnpm run compact` — circuits compiled | `pnpm run deploy --network preview` |
+
+| Test Output (10/10 passing) |
+|:---:|
+| ![tests](./screenshots/tests-output.png) |
+| `pnpm test` — artifacts, circuits, API suite |
 
 ## 📋 Product Idea
 
