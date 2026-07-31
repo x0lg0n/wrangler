@@ -31,7 +31,21 @@ const NETWORK_URLS: Record<string, { indexer: string }> = {
   preprod: { indexer: 'https://indexer.preprod.midnight.network/api/v4/graphql' },
 };
 
+const envDeployment = (): Deployment | null => {
+  const raw = process.env.MIDNIGHT_DEPLOYMENT;
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed?.address && parsed?.network) return parsed as Deployment;
+    return null;
+  } catch {
+    return null;
+  }
+};
+
 export function readDeployment(): { deployment: Deployment | null; error: string | null } {
+  const fromEnv = envDeployment();
+  if (fromEnv) return { deployment: fromEnv, error: null };
   try {
     if (!existsSync(statePath)) {
       return { deployment: null, error: 'No deployment state found.' };
@@ -50,6 +64,8 @@ export function readDeployment(): { deployment: Deployment | null; error: string
 }
 
 export function readAuthSecret(): string | null {
+  const fromEnv = envDeployment();
+  if (fromEnv?.authSecret) return fromEnv.authSecret;
   try {
     if (!existsSync(statePath)) return null;
     const raw = readFileSync(statePath, 'utf-8');
@@ -62,6 +78,14 @@ export function readAuthSecret(): string | null {
 }
 
 export function loadFeedbacks(): FeedbackEntry[] {
+  const fromEnv = process.env.MIDNIGHT_FEEDBACKS;
+  if (fromEnv) {
+    try {
+      return JSON.parse(fromEnv) as FeedbackEntry[];
+    } catch {
+      return [];
+    }
+  }
   if (!existsSync(feedbacksPath)) return [];
   try {
     return JSON.parse(readFileSync(feedbacksPath, 'utf-8'));
@@ -80,7 +104,11 @@ export function saveFeedback(message: string, txHash: string): FeedbackEntry {
     txId: txHash,
   };
   list.push(entry);
-  writeFileSync(feedbacksPath, JSON.stringify(list, null, 2));
+  try {
+    writeFileSync(feedbacksPath, JSON.stringify(list, null, 2));
+  } catch {
+    // read-only filesystem (serverless): keep the entry in memory only
+  }
   return entry;
 }
 

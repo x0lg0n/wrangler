@@ -26,6 +26,20 @@ export interface State {
 }
 
 export function readState(): { deployment: Deployment | null; error: string | null } {
+  const fromEnv = process.env.MIDNIGHT_DEPLOYMENT;
+  if (fromEnv) {
+    try {
+      const parsed = JSON.parse(fromEnv);
+      if (parsed?.address && parsed?.network) {
+        return {
+          deployment: { address: parsed.address, network: parsed.network, deployer: parsed.deployer, deployedAt: parsed.deployedAt },
+          error: null,
+        };
+      }
+    } catch {
+      return { deployment: null, error: 'MIDNIGHT_DEPLOYMENT is not valid JSON.' };
+    }
+  }
   try {
     if (!existsSync(statePath)) {
       return { deployment: null, error: 'No deployment state found. Run pnpm run deploy first.' };
@@ -52,6 +66,14 @@ export function readState(): { deployment: Deployment | null; error: string | nu
 }
 
 export function loadFeedbacks(): FeedbackEntry[] {
+  const fromEnv = process.env.MIDNIGHT_FEEDBACKS;
+  if (fromEnv) {
+    try {
+      return JSON.parse(fromEnv) as FeedbackEntry[];
+    } catch {
+      return [];
+    }
+  }
   if (!existsSync(feedbacksPath)) return [];
   try {
     return JSON.parse(readFileSync(feedbacksPath, 'utf-8'));
