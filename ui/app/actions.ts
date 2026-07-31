@@ -38,7 +38,7 @@ export async function saveFeedbackTx(formData: FormData) {
     return { ok: false, error: 'txHash is required' };
   }
 
-  const entry = saveFeedback(message.trim(), txHash.trim());
+  const entry = await saveFeedback(message.trim(), txHash.trim());
   return { ok: true, entry };
 }
 
@@ -55,7 +55,7 @@ export async function submitFeedback(formData: FormData) {
     return { ok: false, error: result.error };
   }
 
-  const entry = saveFeedback(message.trim(), result.txHash);
+  const entry = await saveFeedback(message.trim(), result.txHash);
 
   return { ok: true, entry };
 }

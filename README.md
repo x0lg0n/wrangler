@@ -27,7 +27,8 @@ environment variables instead of local files:
 | Variable | Value |
 |----------|-------|
 | `MIDNIGHT_DEPLOYMENT` | JSON: `{ "address", "network", "deployer", "deployedAt", "authSecret" }` |
-| `MIDNIGHT_FEEDBACKS` | JSON array of feedback entries (display seed) |
+| `MIDNIGHT_FEEDBACKS` | JSON array of feedback entries (display seed, used until KV is seeded) |
+| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | Vercel KV (Upstash Redis) — shared store so new submissions appear in the public list for everyone (auto-attached when you create a KV store in the Vercel dashboard) |
 
 ---
 

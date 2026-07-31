@@ -1,6 +1,7 @@
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { decodeFeedbackCount } from '@/lib/contract-ledger';
+import { loadFeedbacksFromStore, appendFeedback } from '@/lib/feedback-store';
 
 const rootDir = resolve(process.cwd(), '..');
 const statePath = resolve(rootDir, '.midnight-state.json');
@@ -77,39 +78,12 @@ export function readAuthSecret(): string | null {
   }
 }
 
-export function loadFeedbacks(): FeedbackEntry[] {
-  const fromEnv = process.env.MIDNIGHT_FEEDBACKS;
-  if (fromEnv) {
-    try {
-      return JSON.parse(fromEnv) as FeedbackEntry[];
-    } catch {
-      return [];
-    }
-  }
-  if (!existsSync(feedbacksPath)) return [];
-  try {
-    return JSON.parse(readFileSync(feedbacksPath, 'utf-8'));
-  } catch {
-    return [];
-  }
+export async function loadFeedbacks(): Promise<FeedbackEntry[]> {
+  return (await loadFeedbacksFromStore()) as FeedbackEntry[];
 }
 
-export function saveFeedback(message: string, txHash: string): FeedbackEntry {
-  const list = loadFeedbacks();
-  const nextId = list.reduce((max, f) => Math.max(max, f.id ?? 0), 0) + 1;
-  const entry: FeedbackEntry = {
-    id: nextId,
-    message,
-    timestamp: new Date().toISOString(),
-    txId: txHash,
-  };
-  list.push(entry);
-  try {
-    writeFileSync(feedbacksPath, JSON.stringify(list, null, 2));
-  } catch {
-    // read-only filesystem (serverless): keep the entry in memory only
-  }
-  return entry;
+export async function saveFeedback(message: string, txHash: string): Promise<FeedbackEntry> {
+  return (await appendFeedback(message, txHash)) as FeedbackEntry;
 }
 
 export async function queryChainCount(address: string, network: string): Promise<number | null> {

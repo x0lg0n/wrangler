@@ -1,5 +1,6 @@
-import { readFileSync, existsSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { loadFeedbacksFromStore, appendFeedback } from '@/lib/feedback-store';
 
 const rootDir = resolve(process.cwd(), '..');
 const statePath = resolve(rootDir, '.midnight-state.json');
@@ -65,33 +66,10 @@ export function readState(): { deployment: Deployment | null; error: string | nu
   }
 }
 
-export function loadFeedbacks(): FeedbackEntry[] {
-  const fromEnv = process.env.MIDNIGHT_FEEDBACKS;
-  if (fromEnv) {
-    try {
-      return JSON.parse(fromEnv) as FeedbackEntry[];
-    } catch {
-      return [];
-    }
-  }
-  if (!existsSync(feedbacksPath)) return [];
-  try {
-    return JSON.parse(readFileSync(feedbacksPath, 'utf-8'));
-  } catch {
-    return [];
-  }
+export async function loadFeedbacks(): Promise<FeedbackEntry[]> {
+  return (await loadFeedbacksFromStore()) as FeedbackEntry[];
 }
 
-export function saveFeedback(message: string, deployment: Deployment): FeedbackEntry {
-  const feedbacks = loadFeedbacks();
-  const nextId = feedbacks.reduce((max, f) => Math.max(max, f.id), 0) + 1;
-  const entry: FeedbackEntry = {
-    id: nextId,
-    message,
-    timestamp: new Date().toISOString(),
-    txId: `${deployment.address.slice(0, 16)}-${nextId}`,
-  };
-  feedbacks.push(entry);
-  writeFileSync(feedbacksPath, JSON.stringify(feedbacks, null, 2));
-  return entry;
+export async function saveFeedback(message: string, deployment: Deployment): Promise<FeedbackEntry> {
+  return (await appendFeedback(message, `${deployment.address.slice(0, 16)}-`)) as FeedbackEntry;
 }
