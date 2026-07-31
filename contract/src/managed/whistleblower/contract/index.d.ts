@@ -4,42 +4,32 @@ export type Witnesses<PS> = {
 }
 
 export type ImpureCircuits<PS> = {
-  isAuthorized(context: __compactRuntime.CircuitContext<PS>,
-               inputCredential_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+  initialize(context: __compactRuntime.CircuitContext<PS>, secret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   submitFeedback(context: __compactRuntime.CircuitContext<PS>,
-                 inputCredential_0: bigint,
-                 feedback_0: string): __compactRuntime.CircuitResults<PS, []>;
+                 feedback_0: string,
+                 credential_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
 }
 
 export type ProvableCircuits<PS> = {
-  isAuthorized(context: __compactRuntime.CircuitContext<PS>,
-               inputCredential_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+  initialize(context: __compactRuntime.CircuitContext<PS>, secret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   submitFeedback(context: __compactRuntime.CircuitContext<PS>,
-                 inputCredential_0: bigint,
-                 feedback_0: string): __compactRuntime.CircuitResults<PS, []>;
+                 feedback_0: string,
+                 credential_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
 }
 
 export type PureCircuits = {
-  generateNullifier(inputCredential_0: bigint, seq_0: bigint): Uint8Array;
 }
 
 export type Circuits<PS> = {
-  isAuthorized(context: __compactRuntime.CircuitContext<PS>,
-               inputCredential_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
-  generateNullifier(context: __compactRuntime.CircuitContext<PS>,
-                    inputCredential_0: bigint,
-                    seq_0: bigint): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  initialize(context: __compactRuntime.CircuitContext<PS>, secret_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   submitFeedback(context: __compactRuntime.CircuitContext<PS>,
-                 inputCredential_0: bigint,
-                 feedback_0: string): __compactRuntime.CircuitResults<PS, []>;
+                 feedback_0: string,
+                 credential_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
 }
 
 export type Ledger = {
   readonly feedbackCount: bigint;
-  readonly nullifierCount: bigint;
-  readonly owner: Uint8Array;
-  readonly sequence: bigint;
-  readonly authorizationSecret: bigint;
+  readonly authorizationSecret: Uint8Array;
 }
 
 export type ContractReferenceLocations = any;

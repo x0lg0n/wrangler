@@ -6,8 +6,11 @@ export * from "./witnesses";
 import * as CompiledWhistleblowerContract from "./managed/whistleblower/contract/index.js";
 
 export const CompiledWhistleblowerContractContract = CompiledContract.make<
-  CompiledWhistleblowerContract.Contract<{ credential: bigint }>
->("Whistleblower", CompiledWhistleblowerContract.Contract<{ credential: bigint }>).pipe(
+  CompiledWhistleblowerContract.Contract<Record<string, never>>
+>(
+  "Whistleblower",
+  CompiledWhistleblowerContract.Contract<Record<string, never>>,
+).pipe(
   CompiledContract.withVacantWitnesses,
   CompiledContract.withCompiledFileAssets("./managed/whistleblower"),
 );
