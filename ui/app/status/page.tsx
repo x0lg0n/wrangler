@@ -68,6 +68,7 @@ function StatCard({
 export default async function StatusPage() {
   const { deployment, error } = readState();
   const feedbacks = await loadFeedbacks();
+  const kvConfigured = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 
   const healthItems = [
     { label: 'Contract', value: deployment ? 'Deployed' : 'Not Deployed', ok: !!deployment, icon: <ShieldCheck className="size-4" /> },
@@ -221,7 +222,11 @@ export default async function StatusPage() {
             <div className="flex flex-col gap-3">
               {[
                 { label: 'Server Actions', value: 'Enabled', ok: true },
-                { label: 'Data Source', value: 'Vercel KV (Redis) + local JSON fallback', ok: true },
+                {
+                  label: 'Data Source',
+                  value: kvConfigured ? 'Vercel KV (Redis)' : 'Local JSON fallback — KV not configured',
+                  ok: kvConfigured,
+                },
                 { label: 'On-chain Integration', value: 'Via Midnight SDK (browser wallet)', ok: true },
                 { label: 'Node.js', value: process.version, ok: true },
                 { label: 'Platform', value: process.platform, ok: true },
