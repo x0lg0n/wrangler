@@ -31,6 +31,7 @@ interface KnownWallet {
 const KNOWN_WALLETS: KnownWallet[] = [
   { match: /lace|io\.midnight\.lace/i, name: 'Lace Wallet' },
   { match: /1am|io\.wh1te|i-am|i_am/i, name: '1AM Wallet' },
+  { match: /midnight/i, name: 'Midnight Wallet' },
 ];
 
 function findKnownWallet(id: string, name: string, rdns: string): KnownWallet | undefined {
