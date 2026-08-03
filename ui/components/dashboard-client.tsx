@@ -6,6 +6,7 @@ import type { FeedbackEntry, Deployment } from '@/lib/contract-server';
 import { getConnectedApi } from '@/lib/wallet';
 import { saveFeedbackTx, getDeploymentInfo } from '@/app/actions';
 import CopyButton from '@/components/copy-button';
+import WalletModal from '@/components/wallet-modal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +42,7 @@ export default function DashboardClient({
   const [feedbacks, setFeedbacks] = useState<FeedbackEntry[]>(initialFeedbacks);
   const [totalCount, setTotalCount] = useState(initialCount);
   const [walletAddr, setWalletAddr] = useState<string | null>(null);
+  const [showWalletModal, setShowWalletModal] = useState(false);
 
   useEffect(() => {
     setWalletAddr(sessionStorage.getItem('wallet_address'));
@@ -119,11 +121,20 @@ export default function DashboardClient({
             <CardDescription className="max-w-xs leading-relaxed">
               Connect your Midnight wallet to submit ZK-verified feedback and access the dashboard.
             </CardDescription>
-            <Button asChild className="mt-2">
-              <a href="/">Connect Wallet</a>
+            <Button className="mt-2" onClick={() => setShowWalletModal(true)}>
+              Connect Wallet
             </Button>
           </CardContent>
         </Card>
+        {showWalletModal && (
+          <WalletModal
+            onClose={() => setShowWalletModal(false)}
+            onConnected={({ walletAddress }) => {
+              setWalletAddr(walletAddress);
+              setShowWalletModal(false);
+            }}
+          />
+        )}
       </main>
     );
   }
