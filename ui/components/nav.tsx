@@ -53,7 +53,7 @@ export default function Nav() {
             <a href="https://github.com/x0lg0n/wrangler" target="_blank" rel="noopener noreferrer" className="rounded-lg px-3.5 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-hover-bg hover:text-foreground max-md:hidden">GitHub</a>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-bg-card px-3 py-1 text-xs font-medium text-secondary-foreground max-md:hidden">
               <span className="inline-block size-1.5 rounded-full bg-accent shadow-[0_0_10px_rgba(var(--accent-rgb),0.5)]" />
-              Preprod
+              Preview
             </span>
             <ThemeToggle />
             {walletAddr ? (
