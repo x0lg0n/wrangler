@@ -1,5 +1,6 @@
 import { ArrowRight, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import LaunchDashboardButton from './launch-dashboard-button';
 
 export default function Hero() {
   return (
@@ -23,12 +24,10 @@ export default function Hero() {
       </p>
 
       <div className="flex flex-wrap items-center justify-center gap-4">
-        <Button asChild size="lg" className="h-12 rounded-full px-7 text-[15px] font-semibold">
-          <a href="/dashboard">
-            Launch Dashboard
-            <ArrowRight className="size-4" />
-          </a>
-        </Button>
+        <LaunchDashboardButton size="lg" className="h-12 rounded-full px-7 text-[15px] font-semibold">
+          Launch Dashboard
+          <ArrowRight className="size-4" />
+        </LaunchDashboardButton>
         <Button
           asChild
           variant="outline"

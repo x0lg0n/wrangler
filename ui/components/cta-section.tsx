@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import LaunchDashboardButton from './launch-dashboard-button';
 
 function GithubIcon({ className }: { className?: string }) {
   return (
@@ -20,12 +21,10 @@ export default function CtaSection() {
           No identity, no tracking, just proof.
         </p>
         <div className="relative flex flex-wrap items-center justify-center gap-4">
-          <Button asChild size="lg" className="h-12 rounded-full px-8 text-[15px] font-semibold">
-            <a href="/dashboard">
+          <LaunchDashboardButton size="lg" className="h-12 rounded-full px-8 text-[15px] font-semibold">
               Launch Dashboard
               <ArrowRight className="size-4" />
-            </a>
-          </Button>
+            </LaunchDashboardButton>
           <Button
             asChild
             variant="outline"
