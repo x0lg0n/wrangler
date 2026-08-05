@@ -14,6 +14,19 @@
 
 ---
 
+## 🚀 Deployed Contract
+
+| | |
+|---|---|
+| **Preview App** | **[wrangler-midnight.vercel.app](https://wrangler-midnight.vercel.app/)** — live dashboard, check the contract on-chain |
+| **Contract Address** | `e1c5d3b6c75ef5671362e29bebbfc9a93d3507255bdf40b7530b63794ce60465` |
+| **Explorer** | [View on Midnight Explorer](https://explorer.preview.midnight.network/contracts/e1c5d3b6c75ef5671362e29bebbfc9a93d3507255bdf40b7530b63794ce60465) |
+| **Network** | Midnight Preview |
+| **Deployed At** | 2026-07-30 |
+| **Deployer** | `mn_addr_preview13pavsacgjvzpj8p6kwdn9lj6h8jymm9gtfs3ch5any5j06ry4qts9l8fdm` |
+
+---
+
 ## 🌐 Live Demo
 
 **[Wrangler](https://wrangler-midnight.vercel.app/)** — deployed to Vercel,
